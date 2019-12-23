@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/home"
+            android:title="@string/mnu_home" />
+        <item
+            android:id="@+id/nav_dp2100"
+            android:icon="@drawable/nav_home"
+            android:title="@string/mnuDP2100" />
+        <item
+            android:id="@+id/nav_water_resources"
+            android:icon="@drawable/waterresources"
+            android:title="@string/mnuWaterResources" />
+        <item
+            android:id="@+id/nav_agriculture"
+            android:icon="@drawable/agriculture"
+            android:title="@string/mnuAgriculture" />
+        <item
+            android:id="@+id/nav_environment_disaster"
+            android:icon="@drawable/drought"
+            android:title="@string/mnuEnvironmentDisaster" />
+        <item
+            android:id="@+id/nav_socio_economic"
+            android:icon="@drawable/social"
+            android:title="@string/mnuSocioEconomic" />
+        <item
+            android:id="@+id/nav_spatial_planning_landuse"
+            android:icon="@drawable/landuse"
+            android:title="@string/mnuSpatialPlanningLanduse" />
+        <item
+            android:id="@+id/nav_climate"
+            android:icon="@drawable/climate"
+            android:title="@string/mnuClimate" />
+    </group>
+
+    <item android:title="Communicate">
+        <menu>
+            <item
+                android:id="@+id/nav_share"
+                android:icon="@drawable/ic_menu_share"
+                android:title="@string/menu_share" />
+            <item
+                android:id="@+id/nav_send"
+                android:icon="@drawable/ic_menu_send"
+                android:title="@string/menu_send" />
+        </menu>
+    </item>
+
+</menu>

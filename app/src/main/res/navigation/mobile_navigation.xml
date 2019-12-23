@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.cegis.deltaplan2100.ui.home.HomeFragment"
+        android:label="@string/mnu_home"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/nav_dp2100"
+        android:name="com.cegis.deltaplan2100.ui.delta.DeltaFragment"
+        android:label="@string/mnuDP2100"
+        tools:layout="@layout/fragment_delta" />
+
+    <fragment
+        android:id="@+id/nav_water_resources"
+        android:name="com.cegis.deltaplan2100.ui.waterresource.WaterResourceFragment"
+        android:label="@string/mnuWaterResources"
+        tools:layout="@layout/fragment_waterresource" />
+
+    <fragment
+        android:id="@+id/nav_agriculture"
+        android:name="com.cegis.deltaplan2100.ui.agriculture.AgricultureFragment"
+        android:label="@string/mnuAgriculture"
+        tools:layout="@layout/fragment_agriculture" />
+
+    <fragment
+        android:id="@+id/nav_environment_disaster"
+        android:name="com.cegis.deltaplan2100.ui.envdis.EnvDisFragment"
+        android:label="@string/mnuEnvironmentDisaster"
+        tools:layout="@layout/fragment_env_dis" />
+
+    <fragment
+        android:id="@+id/nav_socio_economic"
+        android:name="com.cegis.deltaplan2100.ui.socioeconomic.SocioEconomicFragment"
+        android:label="@string/mnuSocioEconomic"
+        tools:layout="@layout/fragment_socio_economic" />
+
+    <fragment
+        android:id="@+id/nav_spatial_planning_landuse"
+        android:name="com.cegis.deltaplan2100.ui.spatialplanninglanduse.SpatialPlanningLanduseFragment"
+        android:label="@string/mnuSpatialPlanningLanduse"
+        tools:layout="@layout/fragment_spatial_planning_landuse" />
+
+    <fragment
+        android:id="@+id/nav_climate"
+        android:name="com.cegis.deltaplan2100.ui.climate.ClimateFragment"
+        android:label="@string/mnuClimate"
+        tools:layout="@layout/fragment_climate" />
+
+    <fragment
+        android:id="@+id/nav_share"
+        android:name="com.cegis.deltaplan2100.ui.share.ShareFragment"
+        android:label="@string/menu_share"
+        tools:layout="@layout/fragment_share" />
+
+    <fragment
+        android:id="@+id/nav_send"
+        android:name="com.cegis.deltaplan2100.ui.send.SendFragment"
+        android:label="@string/menu_send"
+        tools:layout="@layout/fragment_send" />
+</navigation>

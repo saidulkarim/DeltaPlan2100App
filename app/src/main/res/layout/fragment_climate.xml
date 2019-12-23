@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <SearchView
+        android:id="@+id/climate_list_search_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#A3F2FD"
+        android:queryHint="Enter your text here"></SearchView>
+
+    <ListView
+        android:id="@+id/climate_list_items"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#EAFAFC"
+        android:divider="#3596A8"
+        android:dividerHeight="1sp"
+        android:listSelector="#30D7ED" />
+</LinearLayout>
