@@ -1,23 +1,20 @@
 package com.cegis.deltaplan2100.ui.home;
 
+import android.graphics.Typeface;
 import android.os.Bundle;
-import android.os.Handler;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
-import com.cegis.deltaplan2100.MainActivity;
 import com.cegis.deltaplan2100.R;
 import com.cegis.deltaplan2100.ui.agriculture.AgricultureFragment;
 import com.cegis.deltaplan2100.ui.climate.ClimateFragment;
@@ -27,14 +24,12 @@ import com.cegis.deltaplan2100.ui.socioeconomic.SocioEconomicFragment;
 import com.cegis.deltaplan2100.ui.spatialplanninglanduse.SpatialPlanningLanduseFragment;
 import com.cegis.deltaplan2100.ui.waterresource.WaterResourceFragment;
 
-import retrofit2.Converter;
-
 public class HomeFragment extends Fragment implements View.OnClickListener {
     private HomeViewModel homeViewModel;
     private AlertDialog.Builder alertDialogBuilder;
     private View rootView;
 
-    ImageView btnDelta, btnWater, btnAgriculture, btnEnvDis, btnSocial, btnLanduse, btnClimate;
+    LinearLayout btnDelta, btnWater, btnAgriculture, btnEnvDis, btnSocial, btnLanduse, btnClimate;
     //private final String TAG = getResources().getString(R.string.mnuDP2100);
 
     @Override
@@ -44,6 +39,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         homeViewModel = ViewModelProviders.of(this).get(HomeViewModel.class);
         //View root = inflater.inflate(R.layout.fragment_home, container, false);
         //final TextView textView = root.findViewById(R.id.text_home);
+
         homeViewModel.getText().observe(this, new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {

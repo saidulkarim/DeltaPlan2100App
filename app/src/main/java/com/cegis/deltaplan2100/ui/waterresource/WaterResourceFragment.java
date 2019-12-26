@@ -2,6 +2,7 @@ package com.cegis.deltaplan2100.ui.waterresource;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.cegis.deltaplan2100.Api;
+import com.cegis.deltaplan2100.ListAdapter;
 import com.cegis.deltaplan2100.MainActivity;
 import com.cegis.deltaplan2100.models.ModelComponentLevelTwo;
 import com.cegis.deltaplan2100.R;
@@ -74,21 +76,31 @@ public class WaterResourceFragment extends Fragment {
                 dialog.dismiss();
 
                 if (componentList.size() > 0) {
-                    //Creating an String array for the ListView
+                    String[][] items = new String[componentList.size()][100];
                     String[] components = new String[componentList.size()];
 
-                    //looping through all the heroes and inserting the names inside the string array
                     for (int i = 0; i < componentList.size(); i++) {
                         components[i] = componentList.get(i).getComponentName();
+
+                        items[i][0] = componentList.get(i).getComponentName().trim();
+
+                        if (!TextUtils.isEmpty(componentList.get(i).getDataVisualization())) {
+                            items[i][1] = componentList.get(i).getDataVisualization().trim();
+                        }else{
+                            items[i][1] = "";
+                        }
                     }
 
                     //displaying the string array into listview
                     final ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), R.layout.list_view, R.id.list_item_info, components);
-                    listView.setAdapter(adapter);
+                    //listView.setAdapter(adapter);
+                    listView.setAdapter(new ListAdapter(getContext(), items));
 
                     listView.setOnItemClickListener((parent, view, position, id) -> {
-                        String name = components[position];
-                        Toast.makeText(getContext(), name + ": " + position, Toast.LENGTH_SHORT).show();
+                        String name = items[position][0];
+                        String parentID = items[position][1];
+
+                        //Toast.makeText(getContext(), name + ": " + position, Toast.LENGTH_SHORT).show();
                     });
 
                     searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -111,6 +123,7 @@ public class WaterResourceFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<ModelComponentLevelTwo>> call, Throwable t) {
+                dialog.dismiss();
                 Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });

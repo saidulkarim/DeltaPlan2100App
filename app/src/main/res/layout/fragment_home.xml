@@ -1,243 +1,264 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#ffffff"
-    android:gravity="center"
     android:orientation="vertical"
-    android:padding="5dp"
-    android:textAlignment="center">
+    tools:context=".ClimateActivity">
 
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="0dp">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="2">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/btnDelta"
-                android:layout_width="0dp"
-                android:layout_height="100dp"
-                android:layout_margin="2dp"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:padding="5dp"
-                android:src="@drawable/delta"
-                android:text="Delta Plan 2100"
-                tools:ignore="MissingConstraints"
-                tools:layout_editor_absoluteX="150dp"
-                tools:layout_editor_absoluteY="10dp"
-                tools:text="Button" />
-
-            <ImageView
-                android:id="@+id/btnWater"
-                android:layout_width="0dp"
-                android:layout_height="100dp"
-                android:layout_margin="2dp"
-                android:layout_weight="1"
-                android:padding="5dp"
-                android:src="@drawable/waterresources"
-                android:text=""
-                tools:ignore="MissingConstraints"
-                tools:layout_editor_absoluteX="350dp"
-                tools:layout_editor_absoluteY="10dp"
-                tools:text="Button" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="2">
-
-            <TextView
-                android:layout_width="0dp"
+            <!-- First Row-->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="@string/mnuDP2100"
-                android:textColor="@color/DeepGray"
-                android:textSize="16sp" />
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal"
+                android:weightSum="2">
 
-            <TextView
-                android:layout_width="0dp"
+                <LinearLayout
+                    android:id="@+id/btnDelta"
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_margin="2dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/layout_bg_dp2100"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="65dp"
+                        android:layout_height="65dp"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="5dp"
+                        android:src="@drawable/delta" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:background="@color/colorDP2100Dark"
+                        android:fontFamily="@font/titillium_regular"
+                        android:padding="10dp"
+                        android:text="@string/mnuDP2100"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorWhite"
+                        android:textSize="15sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/btnWater"
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_margin="2dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/layout_bg_wr"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="65dp"
+                        android:layout_height="65dp"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="5dp"
+                        android:src="@drawable/waterresources" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:background="@color/colorWrDark"
+                        android:fontFamily="@font/titillium_regular"
+                        android:padding="10dp"
+                        android:text="@string/mnuWaterResources"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorWhite"
+                        android:textSize="15sp" />
+                </LinearLayout>
+            </LinearLayout>
+            <!-- First Row-->
+
+            <!-- Second Row-->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="@string/mnuWaterResources"
-                android:textColor="@color/DeepGray"
-                android:textSize="16sp" />
+                android:orientation="horizontal"
+                android:weightSum="2">
 
-        </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/btnAgriculture"
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_margin="2dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/layout_bg_ag"
+                    android:orientation="vertical">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
+                    <ImageView
+                        android:layout_width="65dp"
+                        android:layout_height="65dp"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="5dp"
+                        android:src="@drawable/agriculture" />
 
-            android:weightSum="2">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:background="@color/colorAgDark"
+                        android:fontFamily="@font/titillium_regular"
+                        android:padding="10dp"
+                        android:text="@string/mnuAgriculture"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorWhite"
+                        android:textSize="15sp" />
+                </LinearLayout>
 
-            <ImageView
-                android:id="@+id/btnAgriculture"
-                android:layout_width="0dp"
-                android:layout_height="100dp"
-                android:layout_margin="2dp"
-                android:layout_weight="1"
-                android:padding="5dp"
-                android:src="@drawable/agriculture"
-                android:text=""
-                tools:ignore="MissingConstraints"
-                tools:layout_editor_absoluteX="150dp"
-                tools:layout_editor_absoluteY="10dp"
-                tools:text="Button" />
+                <LinearLayout
+                    android:id="@+id/btnEnvDis"
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_margin="2dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/layout_bg_ed"
+                    android:orientation="vertical">
 
-            <ImageView
-                android:id="@+id/btnEnvDis"
-                android:layout_width="0dp"
-                android:layout_height="100dp"
-                android:layout_margin="2dp"
-                android:layout_weight="1"
-                android:padding="5dp"
-                android:src="@drawable/drought"
-                android:text=""
-                tools:ignore="MissingConstraints"
-                tools:layout_editor_absoluteX="50dp"
-                tools:layout_editor_absoluteY="50dp"
-                tools:text="Button" />
-        </LinearLayout>
+                    <ImageView
+                        android:layout_width="65dp"
+                        android:layout_height="65dp"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="5dp"
+                        android:src="@drawable/drought" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="2">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:background="@color/colorEdDark"
+                        android:fontFamily="@font/titillium_regular"
+                        android:lineSpacingMultiplier="0.8"
+                        android:padding="3dp"
+                        android:text="@string/mnuEnvironmentDisaster"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorWhite"
+                        android:textSize="15.5sp" />
 
-            <TextView
-                android:layout_width="0dp"
+                </LinearLayout>
+            </LinearLayout>
+            <!-- End Second Row-->
+
+            <!-- Third Row-->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="@string/mnuAgriculture"
-                android:textColor="@color/DeepGray"
-                android:textSize="16sp" />
+                android:orientation="horizontal"
+                android:weightSum="2">
 
-            <TextView
-                android:layout_width="0dp"
+                <LinearLayout
+                    android:id="@+id/btnSocial"
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_margin="2dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/layout_bg_se"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="65dp"
+                        android:layout_height="65dp"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="5dp"
+                        android:src="@drawable/social" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:background="@color/colorSeDark"
+                        android:fontFamily="@font/titillium_regular"
+                        android:padding="10dp"
+                        android:text="@string/mnuSocioEconomic"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorWhite"
+                        android:textSize="15sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/btnLanduse"
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_margin="2dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/layout_bg_sp"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="65dp"
+                        android:layout_height="65dp"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="5dp"
+                        android:src="@drawable/landuse" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:background="@color/colorSpDark"
+                        android:fontFamily="@font/titillium_regular"
+                        android:lineSpacingMultiplier="0.8"
+                        android:padding="5dp"
+                        android:text="@string/mnuSpatialPlanningLanduse"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorWhite"
+                        android:textSize="15sp" />
+
+                </LinearLayout>
+            </LinearLayout>
+            <!-- End Third Row-->
+
+            <!-- Fourth Row-->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="@string/mnuEnvironmentDisaster"
-                android:textColor="@color/DeepGray"
-                android:textSize="16sp" />
-            />
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <LinearLayout
+                    android:id="@+id/btnClimate"
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_margin="2dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/layout_bg_climate"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="65dp"
+                        android:layout_height="65dp"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="5dp"
+                        android:src="@drawable/climate" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginTop="5dp"
+                        android:background="@color/colorClimateDark"
+                        android:fontFamily="@font/titillium_regular"
+                        android:padding="10dp"
+                        android:text="@string/mnuClimate"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorWhite"
+                        android:textSize="15sp" />
+                </LinearLayout>
+            </LinearLayout>
+            <!-- End Fourth Row-->
         </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="2">
-
-            <ImageView
-                android:id="@+id/btnSocial"
-                android:layout_width="0dp"
-                android:layout_height="100dp"
-                android:layout_margin="2dp"
-                android:layout_weight="1"
-                android:padding="5dp"
-                android:src="@drawable/social"
-                android:text=""
-                tools:ignore="MissingConstraints"
-                tools:layout_editor_absoluteX="150dp"
-                tools:layout_editor_absoluteY="10dp"
-                tools:text="Button" />
-
-            <ImageView
-                android:id="@+id/btnLanduse"
-                android:layout_width="0dp"
-                android:layout_height="100dp"
-                android:layout_margin="2dp"
-                android:layout_weight="1"
-                android:onClick="ShowMaesage"
-                android:padding="5dp"
-                android:src="@drawable/landuse"
-                android:text=""
-                tools:ignore="MissingConstraints"
-                tools:layout_editor_absoluteX="350dp"
-                tools:layout_editor_absoluteY="10dp"
-                tools:text="Button " />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="2">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="@string/mnuSocioEconomic"
-                android:textColor="@color/DeepGray"
-                android:textSize="16sp" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="@string/mnuSpatialPlanningLanduse"
-                android:textColor="@color/DeepGray"
-                android:textSize="16sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingLeft="120dp"
-            android:weightSum="2">
-
-            <ImageView
-                android:id="@+id/btnClimate"
-                android:layout_width="0dp"
-                android:layout_height="100dp"
-                android:layout_margin="2dp"
-                android:layout_weight="1"
-                android:padding="5dp"
-                android:src="@drawable/climate"
-                android:text=""
-                tools:ignore="MissingConstraints"
-                tools:layout_editor_absoluteX="150dp"
-                tools:layout_editor_absoluteY="10dp"
-                tools:text="Button" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingLeft="120dp"
-            android:weightSum="2">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="@string/mnuClimate"
-                android:textColor="@color/DeepGray"
-                android:textSize="16sp" />
-        </LinearLayout>
-    </LinearLayout>
-</ScrollView>
+    </ScrollView>
+</LinearLayout>

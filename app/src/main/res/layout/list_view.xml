@@ -12,5 +12,5 @@
         android:padding="5dp"
         android:text="ListView"
         android:textSize="18sp"
-        android:textStyle="bold" />
+        android:fontFamily="@font/titillium_semi_bold"/>
 </LinearLayout>

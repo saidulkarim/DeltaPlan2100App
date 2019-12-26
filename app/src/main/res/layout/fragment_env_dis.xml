@@ -15,8 +15,18 @@
         android:id="@+id/env_dis_list_items"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginLeft="5sp"
         android:background="#EAFAFC"
         android:divider="#3596A8"
         android:dividerHeight="1sp"
         android:listSelector="#30D7ED" />
+
+    <!--<ListView-->
+    <!--        android:id="@+id/env_dis_list_items"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="match_parent"-->
+    <!--        android:background="#EAFAFC"-->
+    <!--        android:divider="#3596A8"-->
+    <!--        android:dividerHeight="1sp"-->
+    <!--        android:listSelector="#30D7ED" />-->
 </LinearLayout>

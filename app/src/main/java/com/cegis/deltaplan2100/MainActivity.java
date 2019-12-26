@@ -155,6 +155,9 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_settings) {
             Toast.makeText(MainActivity.this, "Setting Button Clicked!", Toast.LENGTH_SHORT).show();
+
+            Intent cIntent = new Intent(MainActivity.this, ClimateActivity.class);
+            startActivity(cIntent);
         } else if (item.getItemId() == R.id.action_about) {
             Intent aIntent = new Intent(MainActivity.this, MapActivity.class);
             startActivity(aIntent);

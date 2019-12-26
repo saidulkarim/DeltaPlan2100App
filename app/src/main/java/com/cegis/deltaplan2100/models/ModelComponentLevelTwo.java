@@ -18,7 +18,7 @@ public class ModelComponentLevelTwo {
 
     @SerializedName("DataVisualization")
     @Expose
-    private Object dataVisualization;
+    private String dataVisualization;
 
     @SerializedName("IsActive")
     @Expose
@@ -52,11 +52,11 @@ public class ModelComponentLevelTwo {
         this.componentName = componentName;
     }
 
-    public Object getDataVisualization() {
+    public String getDataVisualization() {
         return dataVisualization;
     }
 
-    public void setDataVisualization(Object dataVisualization) {
+    public void setDataVisualization(String dataVisualization) {
         this.dataVisualization = dataVisualization;
     }
 
