@@ -27,7 +27,7 @@ public class ClimateActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_climate);
 
-        list_view = findViewById(R.id.list_view);
-        list_view.setAdapter(new ListAdapter(this, items));
+        //list_view = findViewById(R.id.list_view);
+        //list_view.setAdapter(new ListAdapter(this, items));
     }
 }

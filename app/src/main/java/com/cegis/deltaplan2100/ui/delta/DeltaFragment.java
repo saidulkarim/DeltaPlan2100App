@@ -19,10 +19,12 @@ import androidx.lifecycle.ViewModelProviders;
 import com.cegis.deltaplan2100.Api;
 import com.cegis.deltaplan2100.ListAdapter;
 import com.cegis.deltaplan2100.MainActivity;
-import com.cegis.deltaplan2100.models.ModelComponentLevelTwo;
 import com.cegis.deltaplan2100.R;
+import com.cegis.deltaplan2100.models.ListViewItems;
+import com.cegis.deltaplan2100.models.ModelComponentLevelTwo;
 import com.cegis.deltaplan2100.ui.layer_three.LayerThreeFragment;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -61,7 +63,7 @@ public class DeltaFragment extends Fragment {
     }
 
     private void getComponents() {
-        ProgressDialog dialog = ProgressDialog.show(getActivity(), "", "Loading. Please wait...", true);
+        ProgressDialog dialog = ProgressDialog.show(getActivity(), "", "Please wait...", true);
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(Api.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create()) //Here we are using the GsonConverterFactory to directly convert json data to object
@@ -78,40 +80,48 @@ public class DeltaFragment extends Fragment {
                 dialog.dismiss();
 
                 if (componentList.size() > 0) {
-                    String[][] items = new String[componentList.size()][100];
                     String[] components = new String[componentList.size()];
+                    List<ListViewItems> lstViewItems = new ArrayList<>();
 
                     for (int i = 0; i < componentList.size(); i++) {
-                        components[i] = componentList.get(i).getComponentName();
+                        components[i] = componentList.get(i).getComponentName().trim();
+                        ListViewItems _lvi = new ListViewItems();
 
-                        items[i][0] = componentList.get(i).getComponentName().trim();
+                        _lvi.setItemID(componentList.get(i).getComponentLevel2Id());
+                        _lvi.setItemName(componentList.get(i).getComponentName().trim());
 
                         if (!TextUtils.isEmpty(componentList.get(i).getDataVisualization())) {
-                            items[i][1] = componentList.get(i).getDataVisualization().trim();
-                        }else{
-                            items[i][1] = "";
+                            _lvi.setItemIcon(componentList.get(i).getDataVisualization().trim());
+                        } else {
+                            _lvi.setItemIcon("");
                         }
+
+                        _lvi.setItemParentID(componentList.get(i).getComponentLevel2Id().toString());
+                        lstViewItems.add(_lvi);
                     }
 
                     final ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), R.layout.list_view, R.id.list_item_info, components);
-                    //listView.setAdapter(adapter);
-                    listView.setAdapter(new ListAdapter(getContext(), items));
+                    listView.setAdapter(new ListAdapter(getContext(), lstViewItems));
 
                     listView.setOnItemClickListener((parent, view, position, id) -> {
-                        String name = items[position][0];
-                        String parentID = items[position][1];
+                        Fragment fragment;
+                        Bundle args;
 
-                        //Toast.makeText(getContext(), name + ": " + position, Toast.LENGTH_SHORT).show();
+                        int itemID = lstViewItems.get(position).getItemID();
+                        String itemName = lstViewItems.get(position).getItemName();
+                        String itemContentAs = lstViewItems.get(position).getItemIcon();
 
-                        LayerThreeFragment ltf = new LayerThreeFragment();
-                        Bundle args = new Bundle();
-                        args.putString("GroupHeader", name);
-                        args.putString("ParentID", parentID);
-                        ltf.setArguments(args);
+                        fragment = new LayerThreeFragment();
+                        args = new Bundle();
+                        args.putInt("ItemID", itemID);
+                        args.putString("GroupHeader", itemName);
+                        args.putString("ItemContentAs", itemContentAs);
+                        args.putInt("ItemParentLevel", 2);
+                        fragment.setArguments(args);
 
                         //Inflate the fragment
                         getFragmentManager().beginTransaction()
-                                .replace(R.id.nav_host_fragment, ltf)
+                                .replace(R.id.nav_host_fragment, fragment)
                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 .addToBackStack(null)
                                 .commit();

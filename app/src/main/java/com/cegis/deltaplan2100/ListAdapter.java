@@ -5,15 +5,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Switch;
 import android.widget.TextView;
+
+import com.cegis.deltaplan2100.models.ListViewItems;
+
+import java.util.List;
 
 public class ListAdapter extends BaseAdapter {
     private static LayoutInflater inflater = null;
     Context context;
-    String[][] items;
+    List<ListViewItems> items;
 
-    public ListAdapter(Context context, String[][] items) {
+    public ListAdapter(Context context, List<ListViewItems> items) {
         this.context = context;
         this.items = items;
 
@@ -22,7 +25,7 @@ public class ListAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return items.length;
+        return items.toArray().length;
     }
 
     @Override
@@ -42,9 +45,9 @@ public class ListAdapter extends BaseAdapter {
         TextView txtItemID = view.findViewById(R.id.txtItemID);
         TextView txtListItem = view.findViewById(R.id.txtListItem);
         FontawesomeLight list_icon = view.findViewById(R.id.list_icon);
-        txtItemID.setText(items[position][1]);
-        txtListItem.setText(items[position][0]);
-        list_icon.setText(getListIcon(items[position][1].trim()));
+        txtItemID.setText(items.get(position).getItemParentID());
+        txtListItem.setText(items.get(position).getItemName());
+        list_icon.setText(getListIcon(items.get(position).getItemIcon()));
         list_icon.setTextSize(25);
         list_icon.setTag(position);
 
@@ -64,7 +67,7 @@ public class ListAdapter extends BaseAdapter {
         switch (type) {
             case "Graph":
             case "Chart":
-            case "Graph/Chart":
+            case "GraphChart":
                 return "\uf080";
 
             case "Map":
@@ -74,7 +77,7 @@ public class ListAdapter extends BaseAdapter {
                 return "\uf0ce";
 
             case "Text":
-            case "Text/Table":
+            case "TextTable":
                 return "\uf036";
 
             default:

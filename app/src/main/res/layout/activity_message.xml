@@ -13,11 +13,11 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="sans-serif"
         android:justificationMode="inter_word"
         android:padding="5dp"
         android:text="@string/text_prime_minister"
-        android:textSize="18sp" />
+        android:textSize="16sp"
+        android:fontFamily="@font/titillium_semi_bold"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -27,11 +27,11 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif"
             android:padding="12dp"
             android:text="@string/prime_minister"
             android:textAlignment="center"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:fontFamily="@font/titillium_regular"/>
     </LinearLayout>
 </LinearLayout>

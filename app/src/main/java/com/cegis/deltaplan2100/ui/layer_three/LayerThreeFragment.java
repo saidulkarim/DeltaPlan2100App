@@ -10,9 +10,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
@@ -20,13 +22,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cegis.deltaplan2100.Api;
+import com.cegis.deltaplan2100.ListAdapter;
 import com.cegis.deltaplan2100.MainActivity;
 import com.cegis.deltaplan2100.R;
-import com.cegis.deltaplan2100.TabularViewFragment;
+import com.cegis.deltaplan2100.models.ContentData;
+import com.cegis.deltaplan2100.models.ListViewItems;
 import com.cegis.deltaplan2100.models.ModelComponentLevelThree;
-import com.cegis.deltaplan2100.models.ModelComponentLevelTwo;
-import com.cegis.deltaplan2100.ui.delta.DeltaViewModel;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -34,14 +39,17 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class LayerThreeFragment extends Fragment {
     private LayerThreeViewModel mViewModel;
     private View root;
+    private WebView webView;
     private ListView listView;
     private SearchView searchView;
     private TextView text_view;
-    String groupHeader, parentID;
+    String groupHeader, itemContentAs, content;
+    int itemID, itemParentLevel;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -58,23 +66,78 @@ public class LayerThreeFragment extends Fragment {
         //            }
         //        });
 
+        itemID = getArguments().getInt("ItemID");
         groupHeader = getArguments().getString("GroupHeader");
-        parentID = getArguments().getString("ParentID");
+        itemContentAs = getArguments().getString("ItemContentAs");
+        itemParentLevel = getArguments().getInt("ItemParentLevel");
 
         ((MainActivity) getActivity()).setToolBar(groupHeader);
+
+        webView = root.findViewById(R.id.web_view);
+        webView.getSettings().setJavaScriptEnabled(true);
 
         text_view = root.findViewById(R.id.text_view);
         searchView = root.findViewById(R.id.layer_three_list_search_view);
         listView = root.findViewById(R.id.layer_three_list_items);
 
         text_view.setText(groupHeader);
-        getComponents();
+
+        if (itemContentAs.toLowerCase().contains("text") ||
+                itemContentAs.toLowerCase().contains("table") ||
+                itemContentAs.toLowerCase().contains("html")) {
+            webView.setVisibility(View.VISIBLE);
+            listView.setAdapter(null);
+            listView.setVisibility(View.GONE);
+            searchView.setVisibility(View.GONE);
+
+            getTextTableHtmlContent();
+        } else {
+            webView.setVisibility(View.GONE);
+            listView.setAdapter(null);
+            listView.setVisibility(View.VISIBLE);
+            searchView.setVisibility(View.VISIBLE);
+
+            getComponents();
+        }
 
         return root;
     }
 
+    private void getTextTableHtmlContent() {
+        ProgressDialog dialog = ProgressDialog.show(getActivity(), "", "Please wait...", true);
+
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .create();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(Api.BASE_URL)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+
+        Api api = retrofit.create(Api.class);
+        Call call = api.getTextTableHtmlContent(itemID, itemParentLevel, itemContentAs);
+
+        call.enqueue(new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) {
+                dialog.dismiss();
+                String content = response.body().toString();
+
+                webView.loadDataWithBaseURL(null, content, "text/HTML", "UTF-8", null);
+            }
+
+            @Override
+            public void onFailure(Call call, Throwable t) {
+                dialog.dismiss();
+                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
     private void getComponents() {
-        ProgressDialog dialog = ProgressDialog.show(getActivity(), "", "Loading. Please wait...", true);
+        ProgressDialog dialog = ProgressDialog.show(getActivity(), "", "Please wait...", true);
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(Api.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create()) //Here we are using the GsonConverterFactory to directly convert json data to object
@@ -82,7 +145,7 @@ public class LayerThreeFragment extends Fragment {
 
         Api api = retrofit.create(Api.class);
 
-        Call<List<ModelComponentLevelThree>> call = api.getComLevelThree(Integer.parseInt(parentID));
+        Call<List<ModelComponentLevelThree>> call = api.getComLevelThree(itemID);
 
         call.enqueue(new Callback<List<ModelComponentLevelThree>>() {
             @Override
@@ -91,31 +154,40 @@ public class LayerThreeFragment extends Fragment {
                 dialog.dismiss();
 
                 if (componentList.size() > 0) {
-                    //Creating an String array for the ListView
                     String[] components = new String[componentList.size()];
+                    List<ListViewItems> lstViewItems = new ArrayList<>();
 
-                    //looping through all the heroes and inserting the names inside the string array
                     for (int i = 0; i < componentList.size(); i++) {
-                        components[i] = componentList.get(i).getComponentName();
+                        ListViewItems _lvi = new ListViewItems();
+
+                        _lvi.setItemName(componentList.get(i).getComponentName().trim());
+
+                        if (!TextUtils.isEmpty(componentList.get(i).getDataVisualization())) {
+                            _lvi.setItemIcon(componentList.get(i).getDataVisualization().trim());
+                        } else {
+                            _lvi.setItemIcon("");
+                        }
+
+                        _lvi.setItemParentID(componentList.get(i).getParentId().toString());
+                        lstViewItems.add(_lvi);
                     }
 
-                    //displaying the string array into listview
                     final ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), R.layout.list_view, R.id.list_item_info, components);
-                    listView.setAdapter(adapter);
+                    listView.setAdapter(new ListAdapter(getContext(), lstViewItems));
 
                     listView.setOnItemClickListener((parent, view, position, id) -> {
-                        String name = components[position];
-                        //Toast.makeText(getContext(), name + ": " + position, Toast.LENGTH_SHORT).show();
+                        String name = lstViewItems.get(position).getItemName();
+                        String parentID = lstViewItems.get(position).getItemParentID();
 
-                        TabularViewFragment tvf = new TabularViewFragment();
+                        LayerThreeFragment ltf = new LayerThreeFragment();
                         Bundle args = new Bundle();
                         args.putString("GroupHeader", name);
-                        args.putString("ParentID", name + ": " + position);
-                        tvf.setArguments(args);
+                        args.putString("ParentID", parentID);
+                        ltf.setArguments(args);
 
                         //Inflate the fragment
                         getFragmentManager().beginTransaction()
-                                .replace(R.id.nav_host_fragment, tvf)
+                                .replace(R.id.nav_host_fragment, ltf)
                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 .addToBackStack(null)
                                 .commit();
@@ -135,7 +207,7 @@ public class LayerThreeFragment extends Fragment {
                     });
                 } else {
                     listView.setAdapter(null);
-                    Toast.makeText(getContext(), "No data found!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Sorry, no data found!", Toast.LENGTH_LONG).show();
                 }
             }
 
