@@ -21,17 +21,4 @@
         android:divider="#3596A8"
         android:dividerHeight="1sp"
         android:listSelector="#30D7ED" />
-
-    <!--    <ListView-->
-    <!--        android:id="@+id/list_view"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="match_parent"-->
-    <!--        android:layout_marginLeft="8dp"-->
-    <!--        android:layout_marginTop="8dp"-->
-    <!--        android:layout_marginRight="8dp"-->
-    <!--        android:layout_marginBottom="8dp"-->
-    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
-    <!--        app:layout_constraintEnd_toEndOf="parent"-->
-    <!--        app:layout_constraintStart_toStartOf="parent"-->
-    <!--        app:layout_constraintTop_toTopOf="parent" />-->
 </LinearLayout>

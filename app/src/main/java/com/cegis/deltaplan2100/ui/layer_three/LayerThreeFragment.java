@@ -21,19 +21,20 @@ import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.cegis.deltaplan2100.Api;
+import com.cegis.deltaplan2100.API;
 import com.cegis.deltaplan2100.ListAdapter;
 import com.cegis.deltaplan2100.MainActivity;
 import com.cegis.deltaplan2100.R;
-import com.cegis.deltaplan2100.models.ContentData;
 import com.cegis.deltaplan2100.models.ListViewItems;
 import com.cegis.deltaplan2100.models.ModelComponentLevelThree;
+import com.cegis.deltaplan2100.ui.layer_four.LayerFourFragment;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -77,27 +78,52 @@ public class LayerThreeFragment extends Fragment {
         webView.getSettings().setJavaScriptEnabled(true);
 
         text_view = root.findViewById(R.id.text_view);
+        text_view.setText(groupHeader);
         searchView = root.findViewById(R.id.layer_three_list_search_view);
         listView = root.findViewById(R.id.layer_three_list_items);
 
-        text_view.setText(groupHeader);
+        if (itemParentLevel == 2) {
+            if (itemContentAs.toLowerCase().contains("text") ||
+                    itemContentAs.toLowerCase().contains("table") ||
+                    itemContentAs.toLowerCase().contains("html")) {
+                webView.setVisibility(View.VISIBLE);
+                listView.setAdapter(null);
+                listView.setVisibility(View.GONE);
+                searchView.setVisibility(View.GONE);
 
-        if (itemContentAs.toLowerCase().contains("text") ||
-                itemContentAs.toLowerCase().contains("table") ||
-                itemContentAs.toLowerCase().contains("html")) {
-            webView.setVisibility(View.VISIBLE);
-            listView.setAdapter(null);
-            listView.setVisibility(View.GONE);
-            searchView.setVisibility(View.GONE);
+                getTextTableHtmlContent();
+            } else if (itemContentAs.toLowerCase().contains("map")) {
+                //map content
+            } else if (itemContentAs.toLowerCase().contains("graph") ||
+                    itemContentAs.toLowerCase().contains("chart") ||
+                    itemContentAs.toLowerCase().contains("graphchart")) {
+                //graph chart content
+            } else {
+                webView.setVisibility(View.GONE);
+                listView.setAdapter(null);
+                listView.setVisibility(View.VISIBLE);
+                searchView.setVisibility(View.VISIBLE);
 
-            getTextTableHtmlContent();
-        } else {
-            webView.setVisibility(View.GONE);
-            listView.setAdapter(null);
-            listView.setVisibility(View.VISIBLE);
-            searchView.setVisibility(View.VISIBLE);
+                getComponents();
+            }
+        } else if (itemParentLevel == 3) {
+            Fragment fragment;
+            Bundle args;
 
-            getComponents();
+            fragment = new LayerFourFragment();
+            args = new Bundle();
+            args.putInt("ItemID", itemID);
+            args.putString("GroupHeader", groupHeader);
+            args.putString("ItemContentAs", itemContentAs);
+            args.putInt("ItemParentLevel", 3);
+            fragment.setArguments(args);
+
+            //Inflate the fragment
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.nav_host_fragment, fragment)
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                    .addToBackStack(null)
+                    .commit();
         }
 
         return root;
@@ -109,14 +135,15 @@ public class LayerThreeFragment extends Fragment {
         Gson gson = new GsonBuilder()
                 .setLenient()
                 .create();
-
+        OkHttpClient okHttpClient = API.getUnsafeOkHttpClient();
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Api.BASE_URL)
+                .baseUrl(API.BASE_URL)
+                .client(okHttpClient)
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
 
-        Api api = retrofit.create(Api.class);
+        API api = retrofit.create(API.class);
         Call call = api.getTextTableHtmlContent(itemID, itemParentLevel, itemContentAs);
 
         call.enqueue(new Callback() {
@@ -138,13 +165,15 @@ public class LayerThreeFragment extends Fragment {
 
     private void getComponents() {
         ProgressDialog dialog = ProgressDialog.show(getActivity(), "", "Please wait...", true);
+
+        OkHttpClient okHttpClient = API.getUnsafeOkHttpClient();
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Api.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create()) //Here we are using the GsonConverterFactory to directly convert json data to object
+                .baseUrl(API.BASE_URL)
+                .client(okHttpClient)
+                .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
-        Api api = retrofit.create(Api.class);
-
+        API api = retrofit.create(API.class);
         Call<List<ModelComponentLevelThree>> call = api.getComLevelThree(itemID);
 
         call.enqueue(new Callback<List<ModelComponentLevelThree>>() {
@@ -158,8 +187,10 @@ public class LayerThreeFragment extends Fragment {
                     List<ListViewItems> lstViewItems = new ArrayList<>();
 
                     for (int i = 0; i < componentList.size(); i++) {
+                        components[i] = componentList.get(i).getComponentName().trim();
                         ListViewItems _lvi = new ListViewItems();
 
+                        _lvi.setItemID(componentList.get(i).getComponentLevel3Id());
                         _lvi.setItemName(componentList.get(i).getComponentName().trim());
 
                         if (!TextUtils.isEmpty(componentList.get(i).getDataVisualization())) {
@@ -168,7 +199,7 @@ public class LayerThreeFragment extends Fragment {
                             _lvi.setItemIcon("");
                         }
 
-                        _lvi.setItemParentID(componentList.get(i).getParentId().toString());
+                        _lvi.setItemParentID(componentList.get(i).getComponentLevel3Id().toString());
                         lstViewItems.add(_lvi);
                     }
 
@@ -176,21 +207,44 @@ public class LayerThreeFragment extends Fragment {
                     listView.setAdapter(new ListAdapter(getContext(), lstViewItems));
 
                     listView.setOnItemClickListener((parent, view, position, id) -> {
-                        String name = lstViewItems.get(position).getItemName();
-                        String parentID = lstViewItems.get(position).getItemParentID();
+                        Fragment fragment;
+                        Bundle args;
 
-                        LayerThreeFragment ltf = new LayerThreeFragment();
-                        Bundle args = new Bundle();
-                        args.putString("GroupHeader", name);
-                        args.putString("ParentID", parentID);
-                        ltf.setArguments(args);
+                        int itemID = lstViewItems.get(position).getItemID();
+                        String itemName = lstViewItems.get(position).getItemName();
+                        String itemContentAs = lstViewItems.get(position).getItemIcon();
+
+                        fragment = new LayerFourFragment();
+                        args = new Bundle();
+                        args.putInt("ItemID", itemID);
+                        args.putString("GroupHeader", itemName);
+                        args.putString("ItemContentAs", itemContentAs);
+                        args.putInt("ItemParentLevel", 3);
+                        fragment.setArguments(args);
 
                         //Inflate the fragment
                         getFragmentManager().beginTransaction()
-                                .replace(R.id.nav_host_fragment, ltf)
+                                .replace(R.id.nav_host_fragment, fragment)
                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 .addToBackStack(null)
                                 .commit();
+
+//                        else if (itemParentLevel == 3) {
+//                            fragment = new LayerFourFragment();
+//                            args = new Bundle();
+//                            args.putInt("ItemID", itemID);
+//                            args.putString("GroupHeader", groupHeader);
+//                            args.putString("ItemContentAs", itemContentAs);
+//                            args.putInt("ItemParentLevel", 3);
+//                            fragment.setArguments(args);
+//
+//                            //Inflate the fragment
+//                            getFragmentManager().beginTransaction()
+//                                    .replace(R.id.nav_host_fragment, fragment)
+//                                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+//                                    .addToBackStack(null)
+//                                    .commit();
+//                        }
                     });
 
                     searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {

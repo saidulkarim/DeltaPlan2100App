@@ -9,17 +9,14 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
-import com.cegis.deltaplan2100.Api;
+import com.cegis.deltaplan2100.API;
 import com.cegis.deltaplan2100.ListAdapter;
 import com.cegis.deltaplan2100.MainActivity;
 import com.cegis.deltaplan2100.R;
@@ -30,11 +27,13 @@ import com.cegis.deltaplan2100.ui.layer_three.LayerThreeFragment;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class AgricultureFragment extends Fragment {
     private AgricultureViewModel agricultureViewModel;
@@ -67,13 +66,15 @@ public class AgricultureFragment extends Fragment {
 
     private void getComponents() {
         ProgressDialog dialog = ProgressDialog.show(getActivity(), "", "Please wait...", true);
+
+        OkHttpClient okHttpClient = API.getUnsafeOkHttpClient();
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(Api.BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create()) //Here we are using the GsonConverterFactory to directly convert json data to object
+                .baseUrl(API.BASE_URL)
+                .client(okHttpClient)
+                .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
-        Api api = retrofit.create(Api.class);
-
+        API api = retrofit.create(API.class);
         Call<List<ModelComponentLevelTwo>> call = api.getComLevelTwo(Integer.parseInt(getResources().getString(R.string.db_mnuAgriculture)));
 
         call.enqueue(new Callback<List<ModelComponentLevelTwo>>() {

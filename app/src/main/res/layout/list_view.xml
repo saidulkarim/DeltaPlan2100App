@@ -8,9 +8,9 @@
         android:id="@+id/list_item_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/titillium_semi_bold"
         android:gravity="center_vertical"
         android:padding="5dp"
         android:text="ListView"
-        android:textSize="18sp"
-        android:fontFamily="@font/titillium_semi_bold"/>
+        android:textSize="18sp" />
 </LinearLayout>

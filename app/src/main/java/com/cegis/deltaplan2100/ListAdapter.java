@@ -8,6 +8,7 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.cegis.deltaplan2100.models.ListViewItems;
+import com.cegis.deltaplan2100.utility.FontawesomeLight;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package com.cegis.deltaplan2100;
+package com.cegis.deltaplan2100.utility;
 
 import android.content.Context;
 import android.graphics.Typeface;

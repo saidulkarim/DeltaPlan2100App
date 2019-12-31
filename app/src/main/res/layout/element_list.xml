@@ -56,7 +56,7 @@
         app:layout_constraintStart_toStartOf="@+id/guideline5"
         app:layout_constraintTop_toTopOf="@+id/guideline2" />
 
-    <com.cegis.deltaplan2100.FontawesomeLight
+    <com.cegis.deltaplan2100.utility.FontawesomeLight
         android:id="@+id/list_icon"
         android:layout_width="30dp"
         android:layout_height="30dp"
