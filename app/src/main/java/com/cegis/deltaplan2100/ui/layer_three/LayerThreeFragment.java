@@ -54,8 +54,6 @@ public class LayerThreeFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        //return inflater.inflate(R.layout.fragment_layer_three, container, false);
-
         mViewModel = ViewModelProviders.of(this).get(LayerThreeViewModel.class);
         root = inflater.inflate(R.layout.fragment_layer_three, container, false);
 
@@ -228,23 +226,6 @@ public class LayerThreeFragment extends Fragment {
                                 .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
                                 .addToBackStack(null)
                                 .commit();
-
-//                        else if (itemParentLevel == 3) {
-//                            fragment = new LayerFourFragment();
-//                            args = new Bundle();
-//                            args.putInt("ItemID", itemID);
-//                            args.putString("GroupHeader", groupHeader);
-//                            args.putString("ItemContentAs", itemContentAs);
-//                            args.putInt("ItemParentLevel", 3);
-//                            fragment.setArguments(args);
-//
-//                            //Inflate the fragment
-//                            getFragmentManager().beginTransaction()
-//                                    .replace(R.id.nav_host_fragment, fragment)
-//                                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-//                                    .addToBackStack(null)
-//                                    .commit();
-//                        }
                     });
 
                     searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {

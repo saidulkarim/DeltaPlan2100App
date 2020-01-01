@@ -1,5 +1,6 @@
 package com.cegis.deltaplan2100;
 
+import com.cegis.deltaplan2100.models.MacroEconIndicatorsList;
 import com.cegis.deltaplan2100.models.ModelComponentLevelOne;
 import com.cegis.deltaplan2100.models.ModelComponentLevelThree;
 import com.cegis.deltaplan2100.models.ModelComponentLevelTwo;
@@ -86,6 +87,11 @@ public interface API {
     Call<String> getTextTableHtmlContent(@Path("parent_id") int parent_id,
                                          @Path("parent_level") int parent_level,
                                          @Path("content_type") String content_type);
+
+    @GET("Content/GetMacroEconIndicator/{parent_id}/{parent_level}/{mei_type}")
+    Call<List<MacroEconIndicatorsList>> getMacroEconIndicatorList(@Path("parent_id") int parent_id,
+                                                                  @Path("parent_level") int parent_level,
+                                                                  @Path("mei_type") int mei_type);
 }
 
 
