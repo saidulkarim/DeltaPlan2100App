@@ -1,5 +1,6 @@
 package com.cegis.deltaplan2100;
 
+import com.cegis.deltaplan2100.models.MacroEconIndicatorPivotData;
 import com.cegis.deltaplan2100.models.MacroEconIndicatorsList;
 import com.cegis.deltaplan2100.models.ModelComponentLevelOne;
 import com.cegis.deltaplan2100.models.ModelComponentLevelThree;
@@ -92,6 +93,9 @@ public interface API {
     Call<List<MacroEconIndicatorsList>> getMacroEconIndicatorList(@Path("parent_id") int parent_id,
                                                                   @Path("parent_level") int parent_level,
                                                                   @Path("mei_type") int mei_type);
+
+    @GET("Content/MacroEconIndicatorPivotData/{indicator_name}")
+    Call<List<MacroEconIndicatorPivotData>> getMacroEconIndiPivotDataList(@Path("indicator_name") String indicator_name);
 }
 
 

@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -47,59 +48,65 @@ public class LayerFourFragment extends Fragment {
     private LinearLayout btnLineChart, btnBarChart, btnPieChart, btnTableView;
     private FontawesomeLight txtLineChart, txtBarChart, txtPieChart, txtTableView;
     private Spinner spnrMacroEconIndicator, spnrMacroEconIndicator2;
+    private Button btnViewReport;
 
     private ArrayList<MacroEconIndicatorsList> lstMacroEconIndicators;
     private ArrayList<String> list = new ArrayList<String>();
     String groupHeader, itemContentAs;
     int itemID, itemParentLevel;
 
-    boolean isLineSelected = false, isBarSelected = false, isPieSelected = false, isTableSelected = false;
+    boolean isChartSelected = false,
+            isLineSelected = false,
+            isBarSelected = false,
+            isPieSelected = false,
+            isTableSelected = false;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         mViewModel = ViewModelProviders.of(this).get(LayerFourViewModel.class);
         root = inflater.inflate(R.layout.fragment_layer_four, container, false);
 
-        //final TextView textView = root.findViewById(R.id.text_gallery);
-        //deltaViewModel.getText().observe(this, new Observer<String>() {
-        //    @Override
-        //    public void onChanged(@Nullable String s) {
-        //        textView.setText(s);
-        //    }
-        //});
-
+        //region control getting from view
         spnrMacroEconIndicator = root.findViewById(R.id.spnrMacroEconIndicator);
-        //spnrMacroEconIndicator2 = root.findViewById(R.id.spnrMacroEconIndicator2);
 
         btnLineChart = root.findViewById(R.id.btnLineChart);
         btnBarChart = root.findViewById(R.id.btnBarChart);
         btnPieChart = root.findViewById(R.id.btnPieChart);
         btnTableView = root.findViewById(R.id.btnTableView);
+        btnViewReport = root.findViewById(R.id.btnViewReport);
 
         txtLineChart = root.findViewById(R.id.txtLineChart);
         txtBarChart = root.findViewById(R.id.txtBarChart);
         txtPieChart = root.findViewById(R.id.txtPieChart);
         txtTableView = root.findViewById(R.id.txtTableView);
+        //endregion
 
+        //region receiving params from called fragment
         itemID = getArguments().getInt("ItemID");
         groupHeader = getArguments().getString("GroupHeader");
         itemContentAs = getArguments().getString("ItemContentAs");
         itemParentLevel = getArguments().getInt("ItemParentLevel");
+        //endregion receiving
 
+        //region loading dropdown data
         ((MainActivity) getActivity()).setToolBar(groupHeader);
+        loadMacroEconIndicatorData(spnrMacroEconIndicator, 2); //BAU: 1; BDP: 2
+        //endregion
 
-        loadMacroEconIndicatorData(spnrMacroEconIndicator, 1);
-        //loadMacroEconIndicatorData(spnrMacroEconIndicator2, 2);
-
+        //region set font-awesome icon in textbox
         txtLineChart.setText("\uf201");
         txtBarChart.setText("\uf080");
         txtPieChart.setText("\uf200");
         txtTableView.setText("\uf0ce");
+        //endregion set font-awesome
 
+        //region button click event listener
         btnLineChart.setOnClickListener(this::onClick);
         btnBarChart.setOnClickListener(this::onClick);
         btnPieChart.setOnClickListener(this::onClick);
         btnTableView.setOnClickListener(this::onClick);
+        btnViewReport.setOnClickListener(this::onClick);
+        //endregion
 
         return root;
     }
@@ -107,38 +114,62 @@ public class LayerFourFragment extends Fragment {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btnLineChart:
-                if (!isLineSelected) {
+                if (!isChartSelected || !isLineSelected) {
                     btnLineChart.setBackgroundResource(0);
+                    btnBarChart.setBackgroundResource(R.drawable.bg_white);
+                    btnPieChart.setBackgroundResource(R.drawable.bg_white);
+
                     btnLineChart.setBackgroundResource(R.drawable.bg_white_selected);
-                    isLineSelected = true;
+                    isChartSelected = isLineSelected = true;
+                    isBarSelected = false;
+                    isPieSelected = false;
                 } else {
                     btnLineChart.setBackgroundResource(0);
+                    btnBarChart.setBackgroundResource(R.drawable.bg_white);
+                    btnPieChart.setBackgroundResource(R.drawable.bg_white);
+
                     btnLineChart.setBackgroundResource(R.drawable.bg_white);
-                    isLineSelected = false;
+                    isChartSelected = isLineSelected = false;
                 }
                 break;
 
             case R.id.btnBarChart:
-                if (!isBarSelected) {
+                if (!isChartSelected || !isBarSelected) {
+                    btnLineChart.setBackgroundResource(R.drawable.bg_white);
                     btnBarChart.setBackgroundResource(0);
+                    btnPieChart.setBackgroundResource(R.drawable.bg_white);
+
                     btnBarChart.setBackgroundResource(R.drawable.bg_white_selected);
-                    isBarSelected = true;
+                    isChartSelected = isBarSelected = true;
+                    isLineSelected = false;
+                    isPieSelected = false;
                 } else {
+                    btnLineChart.setBackgroundResource(R.drawable.bg_white);
                     btnBarChart.setBackgroundResource(0);
+                    btnPieChart.setBackgroundResource(R.drawable.bg_white);
+
                     btnBarChart.setBackgroundResource(R.drawable.bg_white);
-                    isBarSelected = false;
+                    isChartSelected = isBarSelected = false;
                 }
                 break;
 
             case R.id.btnPieChart:
-                if (!isPieSelected) {
+                if (!isChartSelected || !isPieSelected) {
+                    btnLineChart.setBackgroundResource(R.drawable.bg_white);
+                    btnBarChart.setBackgroundResource(R.drawable.bg_white);
                     btnPieChart.setBackgroundResource(0);
+
                     btnPieChart.setBackgroundResource(R.drawable.bg_white_selected);
-                    isPieSelected = true;
+                    isChartSelected = isPieSelected = true;
+                    isBarSelected = false;
+                    isLineSelected = false;
                 } else {
+                    btnLineChart.setBackgroundResource(R.drawable.bg_white);
+                    btnBarChart.setBackgroundResource(R.drawable.bg_white);
                     btnPieChart.setBackgroundResource(0);
+
                     btnPieChart.setBackgroundResource(R.drawable.bg_white);
-                    isPieSelected = false;
+                    isChartSelected = isPieSelected = false;
                 }
                 break;
 
@@ -152,6 +183,18 @@ public class LayerFourFragment extends Fragment {
                     btnTableView.setBackgroundResource(R.drawable.bg_white);
                     isTableSelected = false;
                 }
+                break;
+
+            case R.id.btnViewReport:
+                String a = "Line Selected: " + isLineSelected;
+                a += "\nBar Selected: " + isBarSelected;
+                a += "\nPie Selected: " + isPieSelected;
+                a += "\n";
+                a += "\nTable Selected: " + isTableSelected;
+
+                Toast.makeText(getContext(), a, Toast.LENGTH_LONG).show();
+
+
                 break;
 
             default:
@@ -203,7 +246,7 @@ public class LayerFourFragment extends Fragment {
                                 @Override
                                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                                     String item = (String) parent.getItemAtPosition(position);
-                                    ((TextView) parent.getChildAt(0)).setTextColor(Color.parseColor("#FFFFFF"));
+                                    ((TextView) parent.getChildAt(0)).setTextColor(Color.parseColor("#2F4F4F"));
                                 }
 
                                 @Override
