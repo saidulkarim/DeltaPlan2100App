@@ -39,8 +39,8 @@ public class TabularViewFragment extends Fragment {
         webView = root.findViewById(R.id.web_view);
         // Enable Javascript
         webView.getSettings().setJavaScriptEnabled(true);
-        barChart = root.findViewById(R.id.barchart);
-        pieChart = root.findViewById(R.id.piechart);
+        //barChart = root.findViewById(R.id.barchart);
+        //pieChart = root.findViewById(R.id.piechart);
 
         if (getArguments() != null) {
             groupHeader = getArguments().getString("GroupHeader");
@@ -246,68 +246,68 @@ public class TabularViewFragment extends Fragment {
             webView.setVisibility(View.VISIBLE);
             webView.loadDataWithBaseURL(null, content, "text/HTML", "UTF-8", null);
         } else if (groupHeader.equals("GDP Per Capita")) {
-            webView.setVisibility(View.GONE);
-            pieChart.setVisibility(View.GONE);
-            barChart.setVisibility(View.VISIBLE);
-
-            ArrayList<BarEntry> entries = new ArrayList<>();
-            entries.add(new BarEntry(8000f, 0));
-            entries.add(new BarEntry(2000f, 1));
-            entries.add(new BarEntry(5000f, 2));
-            entries.add(new BarEntry(20000f, 3));
-            entries.add(new BarEntry(15000f, 4));
-            entries.add(new BarEntry(19000f, 5));
-
-            BarDataSet bardataset = new BarDataSet(entries, "Cells");
-
-            ArrayList<String> labels = new ArrayList<String>();
-            labels.add("2016");
-            labels.add("2015");
-            labels.add("2014");
-            labels.add("2013");
-            labels.add("2012");
-            labels.add("2011");
-
-            BarData data = new BarData(labels, bardataset);
-            barChart.setData(data); // set the data and list of labels into chart
-            barChart.setDescription(groupHeader);  // set the description
-            bardataset.setColors(ColorTemplate.COLORFUL_COLORS);
-            barChart.animateY(5000);
+//            webView.setVisibility(View.GONE);
+//            pieChart.setVisibility(View.GONE);
+//            barChart.setVisibility(View.VISIBLE);
+//
+//            ArrayList<BarEntry> entries = new ArrayList<>();
+//            entries.add(new BarEntry(8000f, 0));
+//            entries.add(new BarEntry(2000f, 1));
+//            entries.add(new BarEntry(5000f, 2));
+//            entries.add(new BarEntry(20000f, 3));
+//            entries.add(new BarEntry(15000f, 4));
+//            entries.add(new BarEntry(19000f, 5));
+//
+//            BarDataSet bardataset = new BarDataSet(entries, "Cells");
+//
+//            ArrayList<String> labels = new ArrayList<String>();
+//            labels.add("2016");
+//            labels.add("2015");
+//            labels.add("2014");
+//            labels.add("2013");
+//            labels.add("2012");
+//            labels.add("2011");
+//
+//            BarData data = new BarData(labels, bardataset);
+//            barChart.setData(data); // set the data and list of labels into chart
+//            barChart.setDescription(groupHeader);  // set the description
+//            bardataset.setColors(ColorTemplate.COLORFUL_COLORS);
+//            barChart.animateY(5000);
         } else if (groupHeader.equals("Labor Force Dynamics")) {
-            webView.setVisibility(View.GONE);
-            barChart.setVisibility(View.GONE);
-            pieChart.setVisibility(View.VISIBLE);
-
-            ArrayList NoOfEmp = new ArrayList();
-            NoOfEmp.add(new Entry(945f, 0));
-            NoOfEmp.add(new Entry(1040f, 1));
-            NoOfEmp.add(new Entry(1133f, 2));
-            NoOfEmp.add(new Entry(1240f, 3));
-            NoOfEmp.add(new Entry(1369f, 4));
-            NoOfEmp.add(new Entry(1487f, 5));
-            NoOfEmp.add(new Entry(1501f, 6));
-            NoOfEmp.add(new Entry(1645f, 7));
-            NoOfEmp.add(new Entry(1578f, 8));
-            NoOfEmp.add(new Entry(1695f, 9));
-            PieDataSet dataSet = new PieDataSet(NoOfEmp, "Number Of Employees");
-
-            //test comment
-            ArrayList year = new ArrayList();
-
-            year.add("2008");
-            year.add("2009");
-            year.add("2010");
-            year.add("2011");
-            year.add("2012");
-            year.add("2013");
-            year.add("2014");
-            year.add("2015");
-            year.add("2016");
-            year.add("2017");
-            PieData data = new PieData(year, dataSet);
-            pieChart.setData(data);
-            dataSet.setColors(ColorTemplate.COLORFUL_COLORS);
-            pieChart.animateXY(5000, 5000);
+//            webView.setVisibility(View.GONE);
+//            barChart.setVisibility(View.GONE);
+//            pieChart.setVisibility(View.VISIBLE);
+//
+//            ArrayList NoOfEmp = new ArrayList();
+//            NoOfEmp.add(new Entry(945f, 0));
+//            NoOfEmp.add(new Entry(1040f, 1));
+//            NoOfEmp.add(new Entry(1133f, 2));
+//            NoOfEmp.add(new Entry(1240f, 3));
+//            NoOfEmp.add(new Entry(1369f, 4));
+//            NoOfEmp.add(new Entry(1487f, 5));
+//            NoOfEmp.add(new Entry(1501f, 6));
+//            NoOfEmp.add(new Entry(1645f, 7));
+//            NoOfEmp.add(new Entry(1578f, 8));
+//            NoOfEmp.add(new Entry(1695f, 9));
+//            PieDataSet dataSet = new PieDataSet(NoOfEmp, "Number Of Employees");
+//
+//            //test comment
+//            ArrayList year = new ArrayList();
+//
+//            year.add("2008");
+//            year.add("2009");
+//            year.add("2010");
+//            year.add("2011");
+//            year.add("2012");
+//            year.add("2013");
+//            year.add("2014");
+//            year.add("2015");
+//            year.add("2016");
+//            year.add("2017");
+//            PieData data = new PieData(year, dataSet);
+//            pieChart.setData(data);
+//            dataSet.setColors(ColorTemplate.COLORFUL_COLORS);
+//            pieChart.animateXY(5000, 5000);
         } else {
             content = "Not implemented!";
             webView.loadDataWithBaseURL(null, content, "text/HTML", "UTF-8", null);
