@@ -2,7 +2,7 @@
     <string name="app_name">Delta Plan 2100</string>
 
     <string name="text_prime_minister">"The Bangladesh Delta Plan (BDP) 2100 is the plan moving Bangladesh forward for the next 100 years. We have formulated BDP 2100 in the way we want to build Bangladesh."</string>
-    <string name="prime_minister">-HON’BLE PRIME MINISTER H.E. SHEIKH HASINA</string><!--<string name="bd_name">People's Republic of Bangladesh</string>-->
+    <string name="prime_minister">-Hon’ble Prime Minister H.E. Sheikh Hasina</string><!--<string name="bd_name">People's Republic of Bangladesh</string>-->
     <string name="access_token">pk.eyJ1IjoiYXRtc2tyb255IiwiYSI6ImNrM3lhejZsNTFpbTgza3B3em9scWZ1dXoifQ.OQsZyP0Abh0bhbVhCu_UCA</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>

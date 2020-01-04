@@ -275,7 +275,7 @@ public class LayerFourFragment extends Fragment {
 
         float barSpace = 0.08f;
         float groupSpace = 0.44f;
-        data.setBarWidth(0.10f);
+        data.setBarWidth(0.30f);
 
         barChart.getXAxis().setAxisMinimum(0);
         barChart.getXAxis().setAxisMaximum(0 + barChart.getBarData().getGroupWidth(groupSpace, barSpace) * 7);
