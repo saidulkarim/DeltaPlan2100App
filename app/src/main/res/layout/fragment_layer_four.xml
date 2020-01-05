@@ -171,11 +171,13 @@
             android:orientation="vertical">
 
             <LinearLayout
+                android:id="@+id/lilaBarChart"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginRight="10dp"
+                android:background="@drawable/bg_white"
                 android:orientation="horizontal"
                 android:weightSum="1">
 
@@ -186,16 +188,35 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/lilaPieChartBDP"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginRight="10dp"
+                android:background="@drawable/bg_white"
                 android:orientation="horizontal"
                 android:weightSum="1">
 
                 <com.github.mikephil.charting.charts.PieChart
-                    android:id="@+id/pieChart"
+                    android:id="@+id/pieChartBDP"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/lilaPieChartBAU"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/bg_white"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <com.github.mikephil.charting.charts.PieChart
+                    android:id="@+id/pieChartBAU"
                     android:layout_width="match_parent"
                     android:layout_height="250dp" />
             </LinearLayout>
