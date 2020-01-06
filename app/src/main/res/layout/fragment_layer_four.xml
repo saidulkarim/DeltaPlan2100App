@@ -150,7 +150,7 @@
             android:id="@+id/btnViewReport"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/bg_white"
+            android:background="@drawable/bg_white_selected"
             android:clickable="true"
             android:focusable="true"
             android:foreground="?android:attr/selectableItemBackground"
@@ -170,6 +170,25 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
+            <!--Line Chart-->
+            <LinearLayout
+                android:id="@+id/lilaLineChart"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/bg_white_selected"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <com.github.mikephil.charting.charts.LineChart
+                    android:id="@+id/lineChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp" />
+            </LinearLayout>
+
+            <!--Bar Chart-->
             <LinearLayout
                 android:id="@+id/lilaBarChart"
                 android:layout_width="match_parent"
@@ -177,7 +196,7 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginRight="10dp"
-                android:background="@drawable/bg_white"
+                android:background="@drawable/bg_white_selected"
                 android:orientation="horizontal"
                 android:weightSum="1">
 
@@ -187,6 +206,7 @@
                     android:layout_height="250dp" />
             </LinearLayout>
 
+            <!--Pie Chart BDP-->
             <LinearLayout
                 android:id="@+id/lilaPieChartBDP"
                 android:layout_width="match_parent"
@@ -194,7 +214,7 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginRight="10dp"
-                android:background="@drawable/bg_white"
+                android:background="@drawable/bg_white_selected"
                 android:orientation="horizontal"
                 android:weightSum="1">
 
@@ -204,6 +224,7 @@
                     android:layout_height="250dp" />
             </LinearLayout>
 
+            <!--Pie Chart BAU-->
             <LinearLayout
                 android:id="@+id/lilaPieChartBAU"
                 android:layout_width="match_parent"
@@ -211,7 +232,7 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginRight="10dp"
-                android:background="@drawable/bg_white"
+                android:background="@drawable/bg_white_selected"
                 android:orientation="horizontal"
                 android:weightSum="1">
 
@@ -219,6 +240,24 @@
                     android:id="@+id/pieChartBAU"
                     android:layout_width="match_parent"
                     android:layout_height="250dp" />
+            </LinearLayout>
+
+            <!--Web View for Table Content-->
+            <LinearLayout
+                android:id="@+id/lilaTableContent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/bg_white_selected"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <WebView
+                    android:id="@+id/webViewTblContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="280dp" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

@@ -3,15 +3,18 @@ package com.cegis.deltaplan2100.ui.layer_four;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.graphics.Color;
+import android.graphics.DashPathEffect;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -27,21 +30,26 @@ import com.cegis.deltaplan2100.models.MacroEconIndicatorPivotData;
 import com.cegis.deltaplan2100.models.MacroEconIndicatorsList;
 import com.cegis.deltaplan2100.utility.FontawesomeLight;
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import okhttp3.OkHttpClient;
@@ -53,6 +61,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 import static android.R.layout.simple_spinner_item;
+import static androidx.constraintlayout.widget.Constraints.TAG;
 import static br.com.zbra.androidlinq.Linq.stream;
 
 public class LayerFourFragment extends Fragment {
@@ -60,18 +69,22 @@ public class LayerFourFragment extends Fragment {
     private View root;
 
     private LinearLayout btnLineChart, btnBarChart, btnPieChart, btnTableView,
-            lilaBarChart, lilaPieChartBDP, lilaPieChartBAU;
+            lilaLineChart, lilaBarChart, lilaPieChartBDP, lilaPieChartBAU, lilaTableContent;
     private FontawesomeLight txtLineChart, txtBarChart, txtPieChart, txtTableView;
     private Spinner spnrMacroEconIndicator, spnrMacroEconIndicator2;
     private Button btnViewReport;
+
+    private LineChart lineChart;
     private BarChart barChart;
     private PieChart pieChartBDP, pieChartBAU;
+    private WebView webViewTblContent;
 
     private ArrayList<MacroEconIndicatorsList> lstMacroEconIndicators;
     public List<MacroEconIndicatorPivotData> lstMEIPivotData;
 
     private ArrayList<String> list = new ArrayList<String>();
     String groupHeader, itemContentAs;
+    List<String> fiscalYearList;
     String[] color = {"#3297BB", "#0C4C6F", "#BB09BB", "#DC4C4E", "#7C7C7C", "#B47C2C", "#0FA18D", "#5A8732", "#04A9E1", "#4169E1", "#5E0B9B", "#42700D"};
     int itemID, itemParentLevel;
 
@@ -95,22 +108,31 @@ public class LayerFourFragment extends Fragment {
         btnTableView = root.findViewById(R.id.btnTableView);
         btnViewReport = root.findViewById(R.id.btnViewReport);
 
+        lilaLineChart = root.findViewById(R.id.lilaLineChart);
         lilaBarChart = root.findViewById(R.id.lilaBarChart);
         lilaPieChartBDP = root.findViewById(R.id.lilaPieChartBDP);
         lilaPieChartBAU = root.findViewById(R.id.lilaPieChartBAU);
+        lilaTableContent = root.findViewById(R.id.lilaTableContent);
 
         txtLineChart = root.findViewById(R.id.txtLineChart);
         txtBarChart = root.findViewById(R.id.txtBarChart);
         txtPieChart = root.findViewById(R.id.txtPieChart);
         txtTableView = root.findViewById(R.id.txtTableView);
 
+        lineChart = root.findViewById(R.id.lineChart);
         barChart = root.findViewById(R.id.barChart);
         pieChartBDP = root.findViewById(R.id.pieChartBDP);
         pieChartBAU = root.findViewById(R.id.pieChartBAU);
+        webViewTblContent = root.findViewById(R.id.webViewTblContent);
+        webViewTblContent.getSettings().setJavaScriptEnabled(true);
+        webViewTblContent.setVerticalScrollBarEnabled(true);
+        webViewTblContent.setHorizontalScrollBarEnabled(true);
 
+        lilaLineChart.setVisibility(View.GONE);
         lilaBarChart.setVisibility(View.GONE);
         lilaPieChartBDP.setVisibility(View.GONE);
         lilaPieChartBAU.setVisibility(View.GONE);
+        lilaTableContent.setVisibility(View.GONE);
         //endregion
 
         //region receiving params from called fragment
@@ -123,6 +145,7 @@ public class LayerFourFragment extends Fragment {
         //region loading dropdown data
         ((MainActivity) getActivity()).setToolBar(groupHeader);
         loadMacroEconIndicatorData(spnrMacroEconIndicator, 2); //BAU: 1; BDP: 2
+        getFiscalYearList();
         //endregion
 
         //region set font-awesome icon in textbox
@@ -218,19 +241,53 @@ public class LayerFourFragment extends Fragment {
                 break;
 
             case R.id.btnViewReport:
-                //String a = "Line Selected: " + isLineSelected;
-                //a += "\nBar Selected: " + isBarSelected;
-                //a += "\nPie Selected: " + isPieSelected;
-                //a += "\n";
-                //a += "\nTable Selected: " + is/
-                //Toast.makeText(getContext(), a, Toast.LENGTH_LONG).show();
-
-                getMEIPivotData();
+                if (isLineSelected || isBarSelected || isPieSelected || isTableSelected) {
+                    getMEIPivotData();
+                } else {
+                    Toast.makeText(getContext(), "Please select data view", Toast.LENGTH_LONG).show();
+                }
                 break;
 
             default:
                 break;
         }
+    }
+
+    public void getFiscalYearList() {
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .create();
+        OkHttpClient okHttpClient = API.getUnsafeOkHttpClient();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(API.BASE_URL)
+                .client(okHttpClient)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+
+        API api = retrofit.create(API.class);
+        Call call = api.getFiscalYearList();
+
+        call.enqueue(new Callback<List<String>>() {
+            @Override
+            public void onResponse(Call<List<String>> call, Response<List<String>> response) {
+                if (response.isSuccessful()) {
+                    try {
+                        fiscalYearList = response.body();
+                    } catch (Exception e) {
+                        fiscalYearList = new ArrayList<>();
+                        e.printStackTrace();
+                    }
+                } else {
+                    fiscalYearList = new ArrayList<>();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<String>> call, Throwable t) {
+                fiscalYearList = new ArrayList<>();
+            }
+        });
     }
 
     public void getMEIPivotData() {
@@ -264,14 +321,9 @@ public class LayerFourFragment extends Fragment {
                                 lstMEIPivotData.add(responseList.get(i));
                             }
 
-                            //String a = "Line Selected: " + isLineSelected;
-                            //a += "\nBar Selected: " + isBarSelected;
-                            //a += "\nPie Selected: " + isPieSelected;
-                            //a += "\n";
-                            //a += "\nTable Selected: " + is/
-                            //Toast.makeText(getContext(), a, Toast.LENGTH_LONG).show();
-
                             if (isLineSelected) {
+                                lilaLineChart.setVisibility(View.VISIBLE);
+
                                 barChart.setData(null);
                                 lilaBarChart.setVisibility(View.GONE);
                                 pieChartBDP.setData(null);
@@ -279,10 +331,12 @@ public class LayerFourFragment extends Fragment {
                                 pieChartBAU.setData(null);
                                 lilaPieChartBAU.setVisibility(View.GONE);
 
-                                // line
+                                loadLineChart(indicatorName, lstMEIPivotData);
                             } else if (isBarSelected) {
                                 lilaBarChart.setVisibility(View.VISIBLE);
 
+                                lineChart.setData(null);
+                                lilaLineChart.setVisibility(View.GONE);
                                 pieChartBDP.setData(null);
                                 lilaPieChartBDP.setVisibility(View.GONE);
                                 pieChartBAU.setData(null);
@@ -293,10 +347,40 @@ public class LayerFourFragment extends Fragment {
                                 lilaPieChartBDP.setVisibility(View.VISIBLE);
                                 lilaPieChartBAU.setVisibility(View.VISIBLE);
 
+                                lineChart.setData(null);
+                                lilaLineChart.setVisibility(View.GONE);
                                 barChart.setData(null);
                                 lilaBarChart.setVisibility(View.GONE);
 
                                 loadPieChart(indicatorName, lstMEIPivotData);
+                            }
+
+                            if (isTableSelected) {
+                                lilaTableContent.setVisibility(View.VISIBLE);
+                                loadTableData(indicatorName, lstMEIPivotData);
+
+                                if (isLineSelected) {
+                                    lilaLineChart.setVisibility(View.VISIBLE);
+                                } else {
+                                    lilaLineChart.setVisibility(View.GONE);
+                                }
+
+                                if (isBarSelected) {
+                                    lilaBarChart.setVisibility(View.VISIBLE);
+                                } else {
+                                    lilaBarChart.setVisibility(View.GONE);
+                                }
+
+                                if (isPieSelected) {
+                                    lilaPieChartBAU.setVisibility(View.VISIBLE);
+                                    lilaPieChartBDP.setVisibility(View.VISIBLE);
+                                } else {
+                                    lilaPieChartBAU.setVisibility(View.GONE);
+                                    lilaPieChartBDP.setVisibility(View.GONE);
+                                }
+                            } else {
+                                lilaTableContent.setVisibility(View.GONE);
+                                webViewTblContent.loadDataWithBaseURL(null, "", "text/HTML", "UTF-8", null);
                             }
                         } else {
                             lstMEIPivotData = new ArrayList<>();
@@ -320,42 +404,164 @@ public class LayerFourFragment extends Fragment {
         });
     }
 
+    private void loadLineChart(String indicatorName, List<MacroEconIndicatorPivotData> lstMEIPivotData) {
+        //region line chart initial config
+//        LimitLine llXAxis = new LimitLine(10f, "Index 10");
+//        llXAxis.setLineWidth(2f);
+//        llXAxis.enableDashedLine(10f, 10f, 0f);
+//        llXAxis.setLabelPosition(LimitLine.LimitLabelPosition.LEFT_TOP);
+//        llXAxis.setTextSize(10f);
+//
+        XAxis xAxis = lineChart.getXAxis();
+        xAxis.enableGridDashedLine(10f, 10f, 0f);
+        xAxis.setAxisMaximum(10f);
+        xAxis.setAxisMinimum(0f);
+        xAxis.setDrawLimitLinesBehindData(true);
+//
+//        LimitLine ll1 = new LimitLine(215f, "Maximum Limit");
+//        ll1.setLineWidth(4f);
+//        ll1.enableDashedLine(10f, 10f, 0f);
+//        ll1.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_TOP);
+//        ll1.setTextSize(10f);
+//
+//        LimitLine ll2 = new LimitLine(70f, "Minimum Limit");
+//        ll2.setLineWidth(4f);
+//        ll2.enableDashedLine(10f, 10f, 0f);
+//        ll2.setLabelPosition(LimitLine.LimitLabelPosition.RIGHT_BOTTOM);
+//        ll2.setTextSize(10f);
+//
+//        YAxis leftAxis = lineChart.getAxisLeft();
+//        leftAxis.removeAllLimitLines();
+//        leftAxis.addLimitLine(ll1);
+//        leftAxis.addLimitLine(ll2);
+//        leftAxis.setAxisMaximum(350f);
+//        leftAxis.setAxisMinimum(0f);
+//        leftAxis.enableGridDashedLine(10f, 10f, 0f);
+//        leftAxis.setDrawZeroLine(false);
+//        leftAxis.setDrawLimitLinesBehindData(false);
+
+        lineChart.getAxisRight().setEnabled(false);
+        lineChart.getDescription().setText(indicatorName);
+        //endregion
+
+        //region set data
+        List<ILineDataSet> dataSets = new ArrayList<>();
+
+//        List<Entry> sinEntries = new ArrayList<>();
+//        List<Entry> cosEntries = new ArrayList<>();
+
+        if (lstMEIPivotData.size() > 0) {
+            for (int i = 0; i < lstMEIPivotData.size(); i++) {
+                ArrayList<Entry> lineEntries = new ArrayList<>();
+
+                lineEntries.add(new Entry(1, Float.parseFloat(lstMEIPivotData.get(i).getFY2016().toString())));
+                lineEntries.add(new Entry(2, Float.parseFloat(lstMEIPivotData.get(i).getFY2020().toString())));
+                lineEntries.add(new Entry(3, Float.parseFloat(lstMEIPivotData.get(i).getFY2021().toString())));
+                lineEntries.add(new Entry(4, Float.parseFloat(lstMEIPivotData.get(i).getFY2025().toString())));
+                lineEntries.add(new Entry(5, Float.parseFloat(lstMEIPivotData.get(i).getFY2026().toString())));
+                lineEntries.add(new Entry(6, Float.parseFloat(lstMEIPivotData.get(i).getFY2030().toString())));
+                lineEntries.add(new Entry(7, Float.parseFloat(lstMEIPivotData.get(i).getFY2031().toString())));
+                lineEntries.add(new Entry(8, Float.parseFloat(lstMEIPivotData.get(i).getFY2035().toString())));
+                lineEntries.add(new Entry(9, Float.parseFloat(lstMEIPivotData.get(i).getFY2036().toString())));
+                lineEntries.add(new Entry(10, Float.parseFloat(lstMEIPivotData.get(i).getFY2040().toString())));
+                lineEntries.add(new Entry(11, Float.parseFloat(lstMEIPivotData.get(i).getFY2041().toString())));
+
+                LineDataSet lineDataSet = new LineDataSet(lineEntries, lstMEIPivotData.get(i).getIndicatorType());
+                dataSets.add(lineDataSet);
+
+                lineDataSet.setDrawIcons(false);
+                lineDataSet.enableDashedLine(10f, 5f, 0f);
+                lineDataSet.enableDashedHighlightLine(10f, 5f, 0f);
+                lineDataSet.setColor(Color.parseColor(color[i]));
+                lineDataSet.setCircleColor(Color.parseColor(color[i]));
+                lineDataSet.setLineWidth(1f);
+                lineDataSet.setCircleRadius(3f);
+                lineDataSet.setDrawCircleHole(false);
+                lineDataSet.setValueTextSize(9f);
+                lineDataSet.setDrawFilled(true);
+                lineDataSet.setFormLineWidth(1f);
+                lineDataSet.setFormLineDashEffect(new DashPathEffect(new float[]{10f, 5f}, 0f));
+                lineDataSet.setFormSize(15.f);
+            }
+        }
+
+//        for (float i = 0; i < 10; i++) {
+//            sinEntries.add(new Entry(i, i * 9F));
+//            cosEntries.add(new Entry(i, i * 4.5F));
+//        }
+//
+//        LineDataSet sinSet = new LineDataSet(sinEntries, "sin curve");
+//        LineDataSet cosSet = new LineDataSet(cosEntries, "cos curve");
+//
+//        // Adding each plot data to a List
+//        dataSets.add(sinSet);
+//        dataSets.add(cosSet);
+//
+//        sinSet.setDrawIcons(false);
+//        cosSet.setDrawIcons(false);
+//
+//        sinSet.enableDashedLine(10f, 5f, 0f);
+//        cosSet.enableDashedLine(10f, 5f, 0f);
+//
+//        sinSet.enableDashedHighlightLine(10f, 5f, 0f);
+//        cosSet.enableDashedHighlightLine(10f, 5f, 0f);
+//
+//        sinSet.setColor(Color.GREEN);
+//        cosSet.setColor(Color.BLUE);
+//
+//        sinSet.setCircleColor(Color.GREEN);
+//        cosSet.setCircleColor(Color.BLUE);
+//
+//        sinSet.setLineWidth(1f);
+//        cosSet.setLineWidth(1f);
+//
+//        sinSet.setCircleRadius(3f);
+//        cosSet.setCircleRadius(3f);
+//
+//        sinSet.setDrawCircleHole(false);
+//        cosSet.setDrawCircleHole(false);
+//
+//        sinSet.setValueTextSize(9f);
+//        cosSet.setValueTextSize(9f);
+//
+//        sinSet.setDrawFilled(true);
+//        cosSet.setDrawFilled(true);
+//
+//        sinSet.setFormLineWidth(1f);
+//        cosSet.setFormLineWidth(1f);
+//
+//        sinSet.setFormLineDashEffect(new DashPathEffect(new float[]{10f, 5f}, 0f));
+//        cosSet.setFormLineDashEffect(new DashPathEffect(new float[]{10f, 5f}, 0f));
+//
+//        sinSet.setFormSize(15.f);
+//        cosSet.setFormSize(15.f);
+
+        LineData data = new LineData(dataSets);
+        lineChart.setData(data);
+        lineChart.invalidate();
+        //endregion
+    }
+
     private void loadBarChart(String indicatorName, List<MacroEconIndicatorPivotData> lstMEIPivotData) {
         BarData data = new BarData();
         BarDataSet barDataSet;
         int groupCount = 0;
-        //ArrayList<String> labels = new ArrayList<>();
-        String[] xAxisLabel = {"2016", "2020", "2021", "2025", "2026", "2030", "2031", "2036", "2040", "2041"};
+        String[] xAxisLabel = fiscalYearList.toArray(new String[fiscalYearList.size()]);
 
         if (lstMEIPivotData.size() > 0) {
             groupCount = xAxisLabel.length;
             for (int i = 0; i < lstMEIPivotData.size(); i++) {
                 ArrayList<BarEntry> barEntries = new ArrayList<>();
 
-                barEntries.add(new BarEntry(1, Float.parseFloat(lstMEIPivotData.get(i).getFY2016().toString())));
-                barEntries.add(new BarEntry(2, Float.parseFloat(lstMEIPivotData.get(i).getFY2020().toString())));
-                barEntries.add(new BarEntry(3, Float.parseFloat(lstMEIPivotData.get(i).getFY2021().toString())));
-                barEntries.add(new BarEntry(4, Float.parseFloat(lstMEIPivotData.get(i).getFY2025().toString())));
-                barEntries.add(new BarEntry(5, Float.parseFloat(lstMEIPivotData.get(i).getFY2026().toString())));
-                barEntries.add(new BarEntry(6, Float.parseFloat(lstMEIPivotData.get(i).getFY2030().toString())));
-                barEntries.add(new BarEntry(7, Float.parseFloat(lstMEIPivotData.get(i).getFY2031().toString())));
-                barEntries.add(new BarEntry(1, Float.parseFloat(lstMEIPivotData.get(i).getFY2016().toString())));
-                barEntries.add(new BarEntry(8, Float.parseFloat(lstMEIPivotData.get(i).getFY2035().toString())));
-                barEntries.add(new BarEntry(9, Float.parseFloat(lstMEIPivotData.get(i).getFY2036().toString())));
-                barEntries.add(new BarEntry(10, Float.parseFloat(lstMEIPivotData.get(i).getFY2040().toString())));
-                barEntries.add(new BarEntry(11, Float.parseFloat(lstMEIPivotData.get(i).getFY2041().toString())));
+                for (int j = 0; j < xAxisLabel.length; j++) {
+                    String val = getFieldNamesAndValues(xAxisLabel[j], lstMEIPivotData.get(i));
+                    barEntries.add(new BarEntry(j + 1, Float.parseFloat(val)));
+                }
 
                 String groupName = lstMEIPivotData.get(i).getIndicatorType();
-                //String labelName = lstMEIPivotData.get(i).getFY2016().getClass().getName();
-                //labels.add(labelName);
-
                 barDataSet = new BarDataSet(barEntries, groupName);
-                //Toast.makeText(getContext(), labelName, Toast.LENGTH_LONG).show();
-                //barDataSet.setColor(chart_color[i + 1]);
                 barDataSet.setColors(Color.parseColor(color[i]));
-
                 data.addDataSet(barDataSet);
-                //data.setBarWidth(0.30f);
             }
 
             barChart.setData(data);
@@ -374,7 +580,7 @@ public class LayerFourFragment extends Fragment {
         barChart.getAxisLeft().setDrawGridLines(true);
         barChart.getAxisRight().setDrawGridLines(false);
 
-        //data
+        //measurement data
         //float groupSpace = 0.04f;
         //float barSpace = 0.02f;
         //float barWidth = 0.46f;
@@ -391,7 +597,7 @@ public class LayerFourFragment extends Fragment {
 
         barChart.groupBars(0, groupSpace, barSpace);
         barChart.getDescription().setText(indicatorName);
-        barChart.animateXY(2000, 2000);
+        barChart.animateXY(1000, 1000);
         barChart.invalidate();
     }
 
@@ -410,16 +616,17 @@ public class LayerFourFragment extends Fragment {
             entriesBDP.add(new PieEntry(Float.parseFloat(bdpMEI.getFY2026().toString()), 4));
             entriesBDP.add(new PieEntry(Float.parseFloat(bdpMEI.getFY2030().toString()), 5));
             entriesBDP.add(new PieEntry(Float.parseFloat(bdpMEI.getFY2031().toString()), 6));
-            entriesBDP.add(new PieEntry(Float.parseFloat(bdpMEI.getFY2036().toString()), 7));
-            entriesBDP.add(new PieEntry(Float.parseFloat(bdpMEI.getFY2040().toString()), 8));
-            entriesBDP.add(new PieEntry(Float.parseFloat(bdpMEI.getFY2041().toString()), 9));
+            entriesBDP.add(new PieEntry(Float.parseFloat(bdpMEI.getFY2035().toString()), 7));
+            entriesBDP.add(new PieEntry(Float.parseFloat(bdpMEI.getFY2036().toString()), 8));
+            entriesBDP.add(new PieEntry(Float.parseFloat(bdpMEI.getFY2040().toString()), 9));
+            entriesBDP.add(new PieEntry(Float.parseFloat(bdpMEI.getFY2041().toString()), 10));
 
             PieDataSet set = new PieDataSet(entriesBDP, indicatorName);
             PieData data = new PieData(set);
             pieChartBDP.setData(data);
             set.setColors(ColorTemplate.COLORFUL_COLORS);
             pieChartBDP.getDescription().setText("BDP: " + indicatorName);
-            pieChartBDP.animateXY(5000, 5000);
+            pieChartBDP.animateXY(1500, 1500);
             pieChartBDP.invalidate();
             //endregion
 
@@ -434,61 +641,143 @@ public class LayerFourFragment extends Fragment {
             entriesBAU.add(new PieEntry(Float.parseFloat(bdpMEI.getFY2026().toString()), 4));
             entriesBAU.add(new PieEntry(Float.parseFloat(bdpMEI.getFY2030().toString()), 5));
             entriesBAU.add(new PieEntry(Float.parseFloat(bdpMEI.getFY2031().toString()), 6));
-            entriesBAU.add(new PieEntry(Float.parseFloat(bdpMEI.getFY2036().toString()), 7));
-            entriesBAU.add(new PieEntry(Float.parseFloat(bdpMEI.getFY2040().toString()), 8));
-            entriesBAU.add(new PieEntry(Float.parseFloat(bdpMEI.getFY2041().toString()), 9));
+            entriesBAU.add(new PieEntry(Float.parseFloat(bdpMEI.getFY2035().toString()), 7));
+            entriesBAU.add(new PieEntry(Float.parseFloat(bdpMEI.getFY2036().toString()), 8));
+            entriesBAU.add(new PieEntry(Float.parseFloat(bdpMEI.getFY2040().toString()), 9));
+            entriesBAU.add(new PieEntry(Float.parseFloat(bdpMEI.getFY2041().toString()), 10));
 
             PieDataSet setBau = new PieDataSet(entriesBAU, indicatorName);
             PieData dataBau = new PieData(setBau);
             pieChartBAU.setData(dataBau);
             setBau.setColors(ColorTemplate.COLORFUL_COLORS);
             pieChartBAU.getDescription().setText("BAU: " + indicatorName);
-            pieChartBAU.animateXY(5000, 5000);
+            pieChartBAU.animateXY(1500, 1500);
             pieChartBAU.invalidate();
             //endregion
         }
     }
 
-    private ArrayList<BarEntry> barEntry1() {
-        ArrayList<BarEntry> barEntries = new ArrayList<>();
+    private void loadTableData(String indicatorName, List<MacroEconIndicatorPivotData> lstMEIPivotData) {
+        String content = new String();
 
-        barEntries.add(new BarEntry(1, 900));
-        barEntries.add(new BarEntry(2, 631));
-        barEntries.add(new BarEntry(3, 1040));
-        barEntries.add(new BarEntry(4, 458));
-        barEntries.add(new BarEntry(5, 2651));
-        barEntries.add(new BarEntry(6, 500));
-        barEntries.add(new BarEntry(7, 350));
+        if (lstMEIPivotData.size() > 0) {
+            content = "<html>\n" +
+                    "\t<head>\n" +
+                    "\t\t<style>\n" +
+                    "\t\t\ttable {\n" +
+                    "\t\t\t\tborder-collapse: collapse;\n" +
+                    "\t\t\t\twidth: 100%;\n" +
+                    "\t\t\t\tfont-size: 80%;\n" +
+                    "\t\t\t}\n" +
+                    "\t\t\tth, td {\n" +
+                    "\t\t\t\tborder: 1px solid #c6c7cc; padding: 10px 15px;\n" +
+                    "\t\t\t}\n" +
+                    "\t\t\tth {\n" +
+                    "\t\t\t\tfont-weight: bold;\n" +
+                    "\t\t\t}\n" +
+                    "\t\t\t.group-header {\n" +
+                    "\t\t\t\tbackground: #D3DADF;\n" +
+                    "\t\t\t\tcolor: #237A98;\n" +
+                    "\t\t\t\tfont-weight: bold;\n" +
+                    "\t\t\t}\n" +
+                    "\t\t\t.odd {\n" +
+                    "\t\t\t\tbackground: #F2F2F2;\n" +
+                    "\t\t\t}\n" +
+                    "\t\t\t.even {\n" +
+                    "\t\t\t\tbackground: #FAFAF7;\n" +
+                    "\t\t\t}\n" +
+                    "\t\t</style>\n" +
+                    "\t</head>\n" +
+                    "\t<body>\n" +
+                    "\t\t<table>\n" +
+                    "\t\t\t<tbody>\n" +
+                    "\t\t\t\t<tr>\n" +
+                    "\t\t\t\t\t<td class=\"group-header\" colspan=\"3\">Indicator: " + indicatorName + "</td>\n" +
+                    "\t\t\t\t</tr>\n" +
+                    "\t\t\t\t<tr>\n" +
+                    "\t\t\t\t\t<td class=\"group-header\" style=\"text-align: center;\"></td>\n" +
+                    "\t\t\t\t\t<td class=\"group-header\" style=\"text-align: center;\">BAU</td>\n" +
+                    "\t\t\t\t\t<td class=\"group-header\" style=\"text-align: center;\">BDP</td>\n" +
+                    "\t\t\t\t</tr>\n" +
 
-        return barEntries;
-    }
+                    "\t\t\t\t<tr>\n" +
+                    "\t\t\t\t\t<td class=\"even\">FY-2016</td>\n" +
+                    "\t\t\t\t\t<td class=\"even\" style=\"text-align: right;\">" + lstMEIPivotData.get(0).getFY2016() + "</td>\n" +
+                    "\t\t\t\t\t<td class=\"even\" style=\"text-align: right;\">" + lstMEIPivotData.get(1).getFY2016() + "</td>\n" +
+                    "\t\t\t\t</tr>\n" +
 
-    private ArrayList<BarEntry> barEntry2() {
-        ArrayList<BarEntry> barEntries = new ArrayList<>();
+                    "\t\t\t\t<tr>\n" +
+                    "\t\t\t\t\t<td class=\"odd\">FY-2020</td>\n" +
+                    "\t\t\t\t\t<td class=\"odd\" style=\"text-align: right;\">" + lstMEIPivotData.get(0).getFY2020() + "</td>\n" +
+                    "\t\t\t\t\t<td class=\"odd\" style=\"text-align: right;\">" + lstMEIPivotData.get(1).getFY2020() + "</td>\n" +
+                    "\t\t\t\t</tr>\n" +
 
-        barEntries.add(new BarEntry(1, 900));
-        barEntries.add(new BarEntry(2, 631));
-        barEntries.add(new BarEntry(3, 1040));
-        barEntries.add(new BarEntry(4, 458));
-        barEntries.add(new BarEntry(5, 2651));
-        barEntries.add(new BarEntry(6, 500));
-        barEntries.add(new BarEntry(7, 350));
+                    "\t\t\t\t<tr>\n" +
+                    "\t\t\t\t\t<td class=\"even\">FY-2021</td>\n" +
+                    "\t\t\t\t\t<td class=\"even\" style=\"text-align: right;\">" + lstMEIPivotData.get(0).getFY2021() + "</td>\n" +
+                    "\t\t\t\t\t<td class=\"even\" style=\"text-align: right;\">" + lstMEIPivotData.get(1).getFY2021() + "</td>\n" +
+                    "\t\t\t\t</tr>\n" +
 
-        return barEntries;
-    }
+                    "\t\t\t\t<tr>\n" +
+                    "\t\t\t\t\t<td class=\"odd\">FY-2025</td>\n" +
+                    "\t\t\t\t\t<td class=\"odd\" style=\"text-align: right;\">" + lstMEIPivotData.get(0).getFY2025() + "</td>\n" +
+                    "\t\t\t\t\t<td class=\"odd\" style=\"text-align: right;\">" + lstMEIPivotData.get(1).getFY2025() + "</td>\n" +
+                    "\t\t\t\t</tr>\n" +
 
-    private ArrayList<BarEntry> barEntry3() {
-        ArrayList<BarEntry> barEntries = new ArrayList<>();
+                    "\t\t\t\t<tr>\n" +
+                    "\t\t\t\t\t<td class=\"even\">FY-2026</td>\n" +
+                    "\t\t\t\t\t<td class=\"even\" style=\"text-align: right;\">" + lstMEIPivotData.get(0).getFY2026() + "</td>\n" +
+                    "\t\t\t\t\t<td class=\"even\" style=\"text-align: right;\">" + lstMEIPivotData.get(1).getFY2026() + "</td>\n" +
+                    "\t\t\t\t</tr>\n" +
 
-        barEntries.add(new BarEntry(1, 900));
-        barEntries.add(new BarEntry(2, 631));
-        barEntries.add(new BarEntry(3, 1040));
-        barEntries.add(new BarEntry(4, 458));
-        barEntries.add(new BarEntry(5, 2651));
-        barEntries.add(new BarEntry(6, 500));
-        barEntries.add(new BarEntry(7, 350));
+                    "\t\t\t\t<tr>\n" +
+                    "\t\t\t\t\t<td class=\"odd\">FY-2030</td>\n" +
+                    "\t\t\t\t\t<td class=\"odd\" style=\"text-align: right;\">" + lstMEIPivotData.get(0).getFY2030() + "</td>\n" +
+                    "\t\t\t\t\t<td class=\"odd\" style=\"text-align: right;\">" + lstMEIPivotData.get(1).getFY2030() + "</td>\n" +
+                    "\t\t\t\t</tr>\n" +
 
-        return barEntries;
+                    "\t\t\t\t<tr>\n" +
+                    "\t\t\t\t\t<td class=\"even\">FY-2031</td>\n" +
+                    "\t\t\t\t\t<td class=\"even\" style=\"text-align: right;\">" + lstMEIPivotData.get(0).getFY2031() + "</td>\n" +
+                    "\t\t\t\t\t<td class=\"even\" style=\"text-align: right;\">" + lstMEIPivotData.get(1).getFY2031() + "</td>\n" +
+                    "\t\t\t\t</tr>\n" +
+
+                    "\t\t\t\t<tr>\n" +
+                    "\t\t\t\t\t<td class=\"odd\">FY-2035</td>\n" +
+                    "\t\t\t\t\t<td class=\"odd\" style=\"text-align: right;\">" + lstMEIPivotData.get(0).getFY2035() + "</td>\n" +
+                    "\t\t\t\t\t<td class=\"odd\" style=\"text-align: right;\">" + lstMEIPivotData.get(1).getFY2035() + "</td>\n" +
+                    "\t\t\t\t</tr>\n" +
+
+                    "\t\t\t\t<tr>\n" +
+                    "\t\t\t\t\t<td class=\"even\">FY-2036</td>\n" +
+                    "\t\t\t\t\t<td class=\"even\" style=\"text-align: right;\">" + lstMEIPivotData.get(0).getFY2036() + "</td>\n" +
+                    "\t\t\t\t\t<td class=\"even\" style=\"text-align: right;\">" + lstMEIPivotData.get(1).getFY2036() + "</td>\n" +
+                    "\t\t\t\t</tr>\n" +
+
+                    "\t\t\t\t<tr>\n" +
+                    "\t\t\t\t\t<td class=\"odd\">FY-2040</td>\n" +
+                    "\t\t\t\t\t<td class=\"odd\" style=\"text-align: right;\">" + lstMEIPivotData.get(0).getFY2040() + "</td>\n" +
+                    "\t\t\t\t\t<td class=\"odd\" style=\"text-align: right;\">" + lstMEIPivotData.get(1).getFY2040() + "</td>\n" +
+                    "\t\t\t\t</tr>\n" +
+
+                    "\t\t\t\t<tr>\n" +
+                    "\t\t\t\t\t<td class=\"even\">FY-2041</td>\n" +
+                    "\t\t\t\t\t<td class=\"even\" style=\"text-align: right;\">" + lstMEIPivotData.get(0).getFY2041() + "</td>\n" +
+                    "\t\t\t\t\t<td class=\"even\" style=\"text-align: right;\">" + lstMEIPivotData.get(1).getFY2041() + "</td>\n" +
+                    "\t\t\t\t</tr>\n" +
+
+                    "\t\t\t</tbody>  \n" +
+                    "\t\t</table>\n" +
+                    "\t</body>\n" +
+                    "</html>";
+
+            //for (int i = 0; i < lstMEIPivotData.size(); i++) {
+            //    content += "";
+            //}
+        }
+
+        webViewTblContent.setVisibility(View.VISIBLE);
+        webViewTblContent.loadDataWithBaseURL(null, content, "text/HTML", "UTF-8", null);
     }
 
     private void loadMacroEconIndicatorData(Spinner spinner, int indicator_type) {
@@ -557,5 +846,44 @@ public class LayerFourFragment extends Fragment {
                 Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    private String getFieldNamesAndValues(String fieldName, MacroEconIndicatorPivotData data) {
+        /*
+        for (Field f : lstMEIPivotData.get(i).getClass().getDeclaredFields()) {
+            f.setAccessible(true);
+            Object o;
+            try {
+                o = f.get(lstMEIPivotData.get(i));
+            } catch (Exception e) {
+                o = e;
+            }
+
+            Log.i(TAG, f.getGenericType() + " " + f.getName() + "(rony) = " + o);
+        }
+        */
+
+        String result = "";
+
+        for (Field f : data.getClass().getDeclaredFields()) {
+            f.setAccessible(true);
+            Object o;
+
+            try {
+                o = f.get(data);
+            } catch (Exception e) {
+                o = e;
+                result = "";
+            }
+
+            //Log.i(TAG, f.getGenericType() + " " + f.getName() + "(rony) = " + o);
+
+            if (f.getName().contains(fieldName)) {
+                result = o.toString();
+                break;
+            }
+        }
+
+        return result;
     }
 }

@@ -94,6 +94,9 @@ public interface API {
                                                                   @Path("parent_level") int parent_level,
                                                                   @Path("mei_type") int mei_type);
 
+    @GET("Content/GetFiscalYearList")
+    Call<List<String>> getFiscalYearList();
+
     @GET("Content/MacroEconIndicatorPivotData/{indicator_name}")
     Call<List<MacroEconIndicatorPivotData>> getMacroEconIndiPivotDataList(@Path("indicator_name") String indicator_name);
 }
