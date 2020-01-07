@@ -26,7 +26,8 @@
         android:layout_marginRight="10dp"
         android:background="@drawable/spinner"
         android:gravity="left|center"
-        android:spinnerMode="dropdown" />
+        android:spinnerMode="dropdown"
+        android:tooltipText="Key Macroeconomic Indicators BDP Policy Options" />
 
     <!-- First Row-->
     <LinearLayout
@@ -250,14 +251,22 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp"
                 android:background="@drawable/bg_white_selected"
                 android:orientation="horizontal"
                 android:weightSum="1">
 
-                <WebView
-                    android:id="@+id/webViewTblContent"
-                    android:layout_width="match_parent"
-                    android:layout_height="280dp" />
+                <ScrollView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:scrollbars="horizontal">
+
+                    <WebView
+                        android:id="@+id/webViewTblContent"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_marginBottom="10dp" />
+                </ScrollView>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

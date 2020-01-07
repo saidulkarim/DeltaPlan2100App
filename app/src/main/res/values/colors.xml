@@ -181,4 +181,20 @@
     <color name="colorAquaDark">#3BAFDA</color>
     <color name="colorPinkRose">#EC87C0</color>
     <color name="colorPinkRoseDark">#D770AD</color>
+
+    <array name="chart_color">
+        <item>#31CCC9</item>
+        <item>#DC4C4E</item>
+        <item>#42700D</item>
+        <item>#F68B42</item>
+        <item>#0C4C6F</item>
+        <item>#0000FF</item>
+        <item>#D770AD</item>
+        <item>#B22222</item>
+        <item>#800080</item>
+        <item>#118081</item>
+        <item>#4B0082</item>
+        <item>#00FF7F</item>
+        <item>#800000</item>
+    </array>
 </resources>

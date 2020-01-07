@@ -39,7 +39,9 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
 
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:8.5.0'
+
+    //map box
+    implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:8.6.0'
 
     // timber
     implementation 'com.jakewharton.timber:timber:4.7.1'
@@ -53,25 +55,13 @@ dependencies {
 
     implementation 'io.reactivex:rxjava:1.1.6'
     implementation 'io.reactivex:rxandroid:1.2.1'
-    implementation 'com.squareup.retrofit2:adapter-rxjava:2.1.0' //This is now DEPRECATED!
+    implementation 'com.squareup.retrofit2:adapter-rxjava:2.1.0'
 
     implementation 'com.squareup.okhttp3:logging-interceptor:3.4.1'
-    implementation 'com.squareup.okhttp3:okhttp:3.4.1'
+    implementation 'com.squareup.okhttp3:okhttp:3.12.3'
 
     //graph chart
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     //linq
     implementation 'br.com.zbra:android-linq:1.1.0'
-
-    //    // Junit
-    //    testImplementation("org.junit.jupiter:junit-jupiter-api:5.0.0")
-    //    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.0.0")
-
-    //    // to run JUnit 3/4 tests:
-    //    testImplementation("junit:junit:4.12")
-    //    testRuntime("org.junit.vintage:junit-vintage-engine:4.12.0")
-
-    // high charts
-    /*implementation 'com.highsoft.highcharts:highcharts:7.1.4'*/
-
 }
