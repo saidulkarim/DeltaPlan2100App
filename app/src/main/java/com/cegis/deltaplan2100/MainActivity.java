@@ -39,14 +39,14 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //        FloatingActionButton fab = findViewById(R.id.fab);
-        //        fab.setOnClickListener(new View.OnClickListener() {
-        //            @Override
-        //            public void onClick(View view) {
-        //                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-        //                        .setAction("Action", null).show();
-        //            }
-        //        });
+        //FloatingActionButton fab = findViewById(R.id.fab);
+        //fab.setOnClickListener(new View.OnClickListener() {
+        //    @Override
+        //    public void onClick(View view) {
+        //        Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+        //                .setAction("Action", null).show();
+        //    }
+        //});
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
@@ -105,38 +105,38 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-//    @Override
-//    public void onBackPressed() {
-//        alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
-//        alertDialogBuilder.setTitle(R.string.close_header_title);
-//        alertDialogBuilder.setMessage("Are you want to close this apps?");
-//        alertDialogBuilder.setCancelable(false);
-//
-//        alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//                finish();
-//            }
-//        });
-//
-//        alertDialogBuilder.setNeutralButton("No", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//                dialog.cancel();
-//            }
-//        });
-//
-//      /*  alertDialogBuilder.setNegativeButton("Cencel", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//                Toast toast = Toast.makeText(MainActivity.this,"You Cencel This",Toast.LENGTH_SHORT);
-//                toast.show();
-//            }
-//        });*/
-//
-//        AlertDialog alertDialog = alertDialogBuilder.create();
-//        alertDialog.show();
-//    }
+    //    @Override
+    //    public void onBackPressed() {
+    //        alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
+    //        alertDialogBuilder.setTitle(R.string.close_header_title);
+    //        alertDialogBuilder.setMessage("Are you want to close this apps?");
+    //        alertDialogBuilder.setCancelable(false);
+    //
+    //        alertDialogBuilder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+    //            @Override
+    //            public void onClick(DialogInterface dialog, int which) {
+    //                finish();
+    //            }
+    //        });
+    //
+    //        alertDialogBuilder.setNeutralButton("No", new DialogInterface.OnClickListener() {
+    //            @Override
+    //            public void onClick(DialogInterface dialog, int which) {
+    //                dialog.cancel();
+    //            }
+    //        });
+    //
+    //      /*  alertDialogBuilder.setNegativeButton("Cencel", new DialogInterface.OnClickListener() {
+    //            @Override
+    //            public void onClick(DialogInterface dialog, int which) {
+    //                Toast toast = Toast.makeText(MainActivity.this,"You Cencel This",Toast.LENGTH_SHORT);
+    //                toast.show();
+    //            }
+    //        });*/
+    //
+    //        AlertDialog alertDialog = alertDialogBuilder.create();
+    //        alertDialog.show();
+    //    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -156,16 +156,20 @@ public class MainActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.action_settings) {
             Toast.makeText(MainActivity.this, "Setting Button Clicked!", Toast.LENGTH_SHORT).show();
 
-            Intent cIntent = new Intent(MainActivity.this, ClimateActivity.class);
+            //Intent cIntent = new Intent(MainActivity.this, ClimateActivity.class);
+            Intent cIntent = new Intent(MainActivity.this, MainActivity.class);
             startActivity(cIntent);
         } else if (item.getItemId() == R.id.action_about) {
-            Intent aIntent = new Intent(MainActivity.this, MapActivity.class);
+            //Intent aIntent = new Intent(MainActivity.this, MapActivity.class);
+            Intent aIntent = new Intent(MainActivity.this, MainActivity.class);
             startActivity(aIntent);
         } else if (item.getItemId() == R.id.action_symbol_layer_info) {
-            Intent aIntent = new Intent(MainActivity.this, LayerMap.class);
+            //Intent aIntent = new Intent(MainActivity.this, LayerMap.class);
+            Intent aIntent = new Intent(MainActivity.this, MainActivity.class);
             startActivity(aIntent);
         } else if (item.getItemId() == R.id.activity_draw_geojson_line) {
-            Intent aIntent = new Intent(MainActivity.this, DrawGeojsonLineActivity.class);
+            //Intent aIntent = new Intent(MainActivity.this, DrawGeojsonLineActivity.class);
+            Intent aIntent = new Intent(MainActivity.this, MainActivity.class);
             startActivity(aIntent);
         }
 

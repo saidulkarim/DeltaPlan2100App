@@ -28,6 +28,7 @@ import com.cegis.deltaplan2100.R;
 import com.cegis.deltaplan2100.models.ListViewItems;
 import com.cegis.deltaplan2100.models.ModelComponentLevelThree;
 import com.cegis.deltaplan2100.ui.layer_four.LayerFourFragment;
+import com.cegis.deltaplan2100.ui.map.MapFragment;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -88,6 +89,7 @@ public class LayerThreeFragment extends Fragment {
                 listView.setAdapter(null);
                 listView.setVisibility(View.GONE);
                 searchView.setVisibility(View.GONE);
+
 
                 getTextTableHtmlContent();
             } else if (itemContentAs.toLowerCase().contains("map")) {
@@ -205,14 +207,21 @@ public class LayerThreeFragment extends Fragment {
                     listView.setAdapter(new ListAdapter(getContext(), lstViewItems));
 
                     listView.setOnItemClickListener((parent, view, position, id) -> {
-                        Fragment fragment;
+                        Fragment fragment = new Fragment();
                         Bundle args;
 
                         int itemID = lstViewItems.get(position).getItemID();
                         String itemName = lstViewItems.get(position).getItemName();
                         String itemContentAs = lstViewItems.get(position).getItemIcon();
 
-                        fragment = new LayerFourFragment();
+                        if (itemContentAs.toLowerCase().contains("map")) {
+                            fragment = new MapFragment();
+                        } else if (itemContentAs.toLowerCase().contains("graph") ||
+                                itemContentAs.toLowerCase().contains("chart") ||
+                                itemContentAs.toLowerCase().contains("graphchart")) {
+                            fragment = new LayerFourFragment();
+                        }
+
                         args = new Bundle();
                         args.putInt("ItemID", itemID);
                         args.putString("GroupHeader", itemName);

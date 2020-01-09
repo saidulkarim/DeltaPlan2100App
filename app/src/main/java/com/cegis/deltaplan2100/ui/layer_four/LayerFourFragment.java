@@ -1,7 +1,9 @@
 package com.cegis.deltaplan2100.ui.layer_four;
 
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProviders;
 
+import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.os.Bundle;
@@ -29,6 +31,7 @@ import com.cegis.deltaplan2100.MainActivity;
 import com.cegis.deltaplan2100.R;
 import com.cegis.deltaplan2100.models.MacroEconIndicatorPivotData;
 import com.cegis.deltaplan2100.models.MacroEconIndicatorsList;
+import com.cegis.deltaplan2100.ui.map.MapFragment;
 import com.cegis.deltaplan2100.utility.FontawesomeLight;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
@@ -64,7 +67,6 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
-import timber.log.Timber;
 
 import static android.R.layout.simple_spinner_item;
 import static androidx.constraintlayout.widget.Constraints.TAG;
@@ -89,10 +91,10 @@ public class LayerFourFragment extends Fragment {
     public List<MacroEconIndicatorPivotData> lstMEIPivotData;
 
     private ArrayList<String> list = new ArrayList<String>();
+    private int itemID, itemParentLevel;
     private String groupHeader, itemContentAs;
     private List<String> fiscalYearList;
     private String[] color = {"#3297BB", "#0C4C6F", "#BB09BB", "#DC4C4E", "#7C7C7C", "#B47C2C", "#0FA18D", "#5A8732", "#04A9E1", "#4169E1", "#5E0B9B", "#42700D"};
-    private int itemID, itemParentLevel;
 
     private boolean isChartSelected = false,
             isLineSelected = false,
@@ -150,8 +152,6 @@ public class LayerFourFragment extends Fragment {
 
         //region loading dropdown data
         ((MainActivity) getActivity()).setToolBar(groupHeader);
-        loadMacroEconIndicatorData(spnrMacroEconIndicator, 2); //BAU: 1; BDP: 2
-        getFiscalYearList();
         //endregion
 
         //region set font-awesome icon in textbox
@@ -167,6 +167,36 @@ public class LayerFourFragment extends Fragment {
         btnPieChart.setOnClickListener(this::onClick);
         btnTableView.setOnClickListener(this::onClick);
         btnViewReport.setOnClickListener(this::onClick);
+        //endregion
+
+        //region action type activity
+        if (itemParentLevel == 2) {
+            //Toast.makeText(this.getContext(), "Item Parent Level 2", Toast.LENGTH_SHORT).show();
+        } else if (itemParentLevel == 3) {
+            if (itemContentAs.toLowerCase().contains("text") ||
+                    itemContentAs.toLowerCase().contains("table") ||
+                    itemContentAs.toLowerCase().contains("html")) {
+                lineChart.setData(null);
+                lilaLineChart.setVisibility(View.GONE);
+                barChart.setData(null);
+                lilaBarChart.setVisibility(View.GONE);
+                pieChartBDP.setData(null);
+                lilaPieChartBDP.setVisibility(View.GONE);
+                pieChartBAU.setData(null);
+                lilaPieChartBAU.setVisibility(View.GONE);
+
+                getTextTableHtmlContent();
+            } else if (itemContentAs.toLowerCase().contains("map")) {
+                Log.i("Map Implementation", "Implemented in LayerThreeFragment");
+            } else if (itemContentAs.toLowerCase().contains("graph") ||
+                    itemContentAs.toLowerCase().contains("chart") ||
+                    itemContentAs.toLowerCase().contains("graphchart")) {
+                getFiscalYearList();
+                loadMacroEconIndicatorData(spnrMacroEconIndicator, 2); //BAU: 1; BDP: 2
+            }
+        } else if (itemParentLevel == 4) {
+            Log.i("Parent Level 4", "Not Implemented");
+        }
         //endregion
 
         return root;
@@ -821,6 +851,40 @@ public class LayerFourFragment extends Fragment {
 
             @Override
             public void onFailure(Call<List<MacroEconIndicatorsList>> call, Throwable t) {
+                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void getTextTableHtmlContent() {
+        ProgressDialog dialog = ProgressDialog.show(getActivity(), "", "Please wait...", true);
+
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .create();
+        OkHttpClient okHttpClient = API.getUnsafeOkHttpClient();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(API.BASE_URL)
+                .client(okHttpClient)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+
+        API api = retrofit.create(API.class);
+        Call call = api.getTextTableHtmlContent(itemID, itemParentLevel, itemContentAs);
+
+        call.enqueue(new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) {
+                dialog.dismiss();
+                String content = response.body().toString();
+
+                webViewTblContent.loadDataWithBaseURL(null, content, "text/HTML", "UTF-8", null);
+            }
+
+            @Override
+            public void onFailure(Call call, Throwable t) {
+                dialog.dismiss();
                 Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
