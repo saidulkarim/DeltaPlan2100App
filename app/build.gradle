@@ -47,14 +47,14 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     //map box
-    //implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:8.6.0'
+    implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:8.6.0'
 
-    //google map
-    implementation "com.google.android.gms:play-services-maps:$googlePlayVersion"
-    implementation "com.google.android.gms:play-services-location:$googlePlayVersion"
-
-    //google map utility
-    implementation 'com.google.maps.android:android-maps-utils:0.5'
+//    //google map
+//    implementation "com.google.android.gms:play-services-maps:$googlePlayVersion"
+//    implementation "com.google.android.gms:play-services-location:$googlePlayVersion"
+//
+//    //google map utility
+//    implementation 'com.google.maps.android:android-maps-utils:0.5'
 
     // timber
     implementation 'com.jakewharton.timber:timber:4.7.1'
