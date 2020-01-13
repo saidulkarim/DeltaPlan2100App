@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/tools"
     xmlns:mapbox="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -19,14 +19,69 @@
         android:layout_height="match_parent"
         mapbox:mapbox_cameraTargetLat="23.781568"
         mapbox:mapbox_cameraTargetLng="90.4112203"
-        mapbox:mapbox_cameraZoom="6" />
+        mapbox:mapbox_cameraZoom="6"
+        mapbox:mapbox_uiRotateGestures="false" />
+    <!--mapbox:mapbox_uiRotateGestures="false"-->
+
+    <!--map label-->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab1"
+        style="@style/Widget.Design.FloatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:background="#66F0F0F0"
+        android:backgroundTint="@color/Maroon"
+        android:clickable="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_label_24"
+        android:tint="@color/White"
+        app:borderWidth="0dp" />
+
+    <!--map marker-->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab2"
+        style="@style/Widget.Design.FloatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:background="#66F0F0F0"
+        android:backgroundTint="@color/Maroon"
+        android:clickable="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_location_24"
+        android:tint="@color/White"
+        app:borderWidth="0dp" />
+
+    <!--full screen-->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab3"
+        style="@style/Widget.Design.FloatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:background="#66F0F0F0"
+        android:backgroundTint="@color/Maroon"
+        android:clickable="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_fullscreen_24"
+        android:tint="@color/White"
+        app:borderWidth="0dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
+        style="@style/Widget.Design.FloatingActionButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="16dp"
-        android:src="@drawable/ic_layer"
-        tools:backgroundTint="@color/colorAquaDark" />
+        android:backgroundTint="@color/Maroon"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_menu_24"
+        android:tint="@color/White"
+        app:elevation="0dp" />
+    <!--android:backgroundTint="@color/colorPrimaryDark"-->
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
