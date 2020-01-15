@@ -33,6 +33,7 @@ import com.cegis.deltaplan2100.models.MacroEconIndicatorPivotData;
 import com.cegis.deltaplan2100.models.MacroEconIndicatorsList;
 import com.cegis.deltaplan2100.ui.map.MapFragment;
 import com.cegis.deltaplan2100.utility.FontawesomeLight;
+import com.cegis.deltaplan2100.utility.GenerateHtmlContent;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
@@ -878,6 +879,7 @@ public class LayerFourFragment extends Fragment {
             public void onResponse(Call call, Response response) {
                 dialog.dismiss();
                 String content = response.body().toString();
+                content = GenerateHtmlContent.getHtmlTable(content);
 
                 webViewTblContent.loadDataWithBaseURL(null, content, "text/HTML", "UTF-8", null);
             }

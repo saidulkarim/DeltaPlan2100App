@@ -1,6 +1,5 @@
 package com.cegis.deltaplan2100.ui.map;
 
-import android.annotation.SuppressLint;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PointF;
@@ -22,7 +21,7 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.cegis.deltaplan2100.MainActivity;
 import com.cegis.deltaplan2100.R;
-import com.cegis.deltaplan2100.utility.GenerateTable;
+import com.cegis.deltaplan2100.utility.GenerateHtmlContent;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.JsonElement;
@@ -43,7 +42,7 @@ import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -58,8 +57,6 @@ import static com.mapbox.mapboxsdk.style.layers.Property.TEXT_JUSTIFY_AUTO;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.circleColor;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillColor;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillOpacity;
-
-import timber.log.Timber;
 
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAnchor;
@@ -227,8 +224,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
         String regex = "[\\/*?\"<>|']";
         String[] keyArray;
         String prjName = new String();
-
-        //region LGED_PROJECT
         List<Feature> featureList = mapboxMap.queryRenderedFeatures(rectF, PROJECT_FILL_LAYER);
 
         if (featureList.size() > 0) {
@@ -260,7 +255,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
                     for (String key : keyArray) {
                         htmlRawContent += "<tr><td>" + key + "</td><td>" + feature.properties().get(key).toString().replaceAll(regex, "") + "</td></tr>";
                     }
-                    htmlRawContent = GenerateTable.getHtmlTable(htmlRawContent);
+                    htmlRawContent = GenerateHtmlContent.getHtmlTable(htmlRawContent);
 
                     wv.loadDataWithBaseURL(null, htmlRawContent, "text/HTML", "UTF-8", null);
                     builder.setView(dialogView);
@@ -273,7 +268,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
 
             return true;
         }
-        //endregion
 
         return false;
     }
@@ -297,51 +291,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
                     ));
         } catch (Throwable throwable) {
             Snackbar.make(this.getView(), "Couldn't add GeoJsonSource to map - %s", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null)
-                    .show();
-        }
-    }
-
-    //layer position: 2
-    //lged project layer
-    private void addLgedProjLayerToMap(@NonNull Style style) {
-        try {
-            GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI("asset://lgedprj.json"));
-            style.addSource(source);
-
-            FillLayer lgedprjArea = new FillLayer(PROJECT_FILL_LAYER, PROJECT_LAYER);
-            lgedprjArea.setProperties(
-                    fillColor(Color.parseColor("#65A0C3")),
-                    fillOpacity(0.8f)
-            );
-
-            SymbolLayer labelLayer = new SymbolLayer(PROJECT_LABEL_LAYER, PROJECT_LAYER)
-                    .withProperties(
-                            textField(get("SPNAME")),
-                            textSize(10f),
-                            textColor(Color.RED),
-                            textVariableAnchor(new String[]{TEXT_ANCHOR_TOP, TEXT_ANCHOR_BOTTOM, TEXT_ANCHOR_LEFT, TEXT_ANCHOR_RIGHT}),
-                            textJustify(TEXT_JUSTIFY_AUTO),
-                            textRadialOffset(0.5f));
-
-            SymbolLayer symbolLayer = new SymbolLayer(PROJECT_SYMBOL_LAYER, PROJECT_LAYER)
-                    .withProperties(
-                            PropertyFactory.iconImage(MAP_MARKER_ICON),
-                            iconAllowOverlap(false),
-                            iconIgnorePlacement(false),
-                            iconOffset(new Float[]{0f, -2f})
-                    );
-
-            style.addLayerAbove(lgedprjArea, ADMIN_BOUNDARY_FILL_LAYER);
-            style.addLayerAbove(labelLayer, PROJECT_FILL_LAYER);
-            style.addLayerAbove(symbolLayer, PROJECT_LABEL_LAYER);
-
-            Layer layer = style.getLayer(PROJECT_LABEL_LAYER);
-            if (layer != null) {
-                layer.setProperties(visibility(NONE));
-            }
-        } catch (Throwable throwable) {
-            Snackbar.make(this.getView(), "Couldn't add LGED to map - %s", Snackbar.LENGTH_LONG)
                     .setAction("Action", null)
                     .show();
         }
@@ -387,6 +336,54 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
             }
         } catch (Throwable throwable) {
             Snackbar.make(this.getView(), "Couldn't add BWDB to map - %s", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null)
+                    .show();
+        }
+    }
+
+    //layer position: 2
+    //lged project layer
+    private void addLgedProjLayerToMap(@NonNull Style style) {
+        try {
+            String url = "https://130.180.3.215/AppMaps/lgedprj.json";
+            GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI(url));
+            //GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI("asset://lgedprj.json"));
+
+            style.addSource(source);
+
+            FillLayer lgedprjArea = new FillLayer(PROJECT_FILL_LAYER, PROJECT_LAYER);
+            lgedprjArea.setProperties(
+                    fillColor(Color.parseColor("#65A0C3")),
+                    fillOpacity(0.8f)
+            );
+
+            SymbolLayer labelLayer = new SymbolLayer(PROJECT_LABEL_LAYER, PROJECT_LAYER)
+                    .withProperties(
+                            textField(get("SPNAME")),
+                            textSize(10f),
+                            textColor(Color.RED),
+                            textVariableAnchor(new String[]{TEXT_ANCHOR_TOP, TEXT_ANCHOR_BOTTOM, TEXT_ANCHOR_LEFT, TEXT_ANCHOR_RIGHT}),
+                            textJustify(TEXT_JUSTIFY_AUTO),
+                            textRadialOffset(0.5f));
+
+            SymbolLayer symbolLayer = new SymbolLayer(PROJECT_SYMBOL_LAYER, PROJECT_LAYER)
+                    .withProperties(
+                            PropertyFactory.iconImage(MAP_MARKER_ICON),
+                            iconAllowOverlap(false),
+                            iconIgnorePlacement(false),
+                            iconOffset(new Float[]{0f, -2f})
+                    );
+
+            style.addLayerAbove(lgedprjArea, ADMIN_BOUNDARY_FILL_LAYER);
+            style.addLayerAbove(labelLayer, PROJECT_FILL_LAYER);
+            style.addLayerAbove(symbolLayer, PROJECT_LABEL_LAYER);
+
+            Layer layer = style.getLayer(PROJECT_LABEL_LAYER);
+            if (layer != null) {
+                layer.setProperties(visibility(NONE));
+            }
+        } catch (Throwable throwable) {
+            Snackbar.make(this.getView(), "Couldn't add LGED to map - %s", Snackbar.LENGTH_LONG)
                     .setAction("Action", null)
                     .show();
         }

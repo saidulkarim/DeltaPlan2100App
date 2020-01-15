@@ -29,6 +29,7 @@ import com.cegis.deltaplan2100.models.ListViewItems;
 import com.cegis.deltaplan2100.models.ModelComponentLevelThree;
 import com.cegis.deltaplan2100.ui.layer_four.LayerFourFragment;
 import com.cegis.deltaplan2100.ui.map.MapFragment;
+import com.cegis.deltaplan2100.utility.GenerateHtmlContent;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -151,6 +152,7 @@ public class LayerThreeFragment extends Fragment {
             public void onResponse(Call call, Response response) {
                 dialog.dismiss();
                 String content = response.body().toString();
+                content = GenerateHtmlContent.getHtmlTable(content);
 
                 webView.loadDataWithBaseURL(null, content, "text/HTML", "UTF-8", null);
             }

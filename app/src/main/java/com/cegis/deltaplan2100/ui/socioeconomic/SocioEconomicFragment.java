@@ -15,7 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.SearchView;
+//import android.widget.SearchView;
 import android.widget.Toast;
 
 import com.cegis.deltaplan2100.API;
@@ -40,7 +40,7 @@ public class SocioEconomicFragment extends Fragment {
     private SocioEconomicViewModel socioEconomicViewModel;
     private View root;
     private ListView listView;
-    private SearchView searchView;
+    //private SearchView searchView;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -57,7 +57,7 @@ public class SocioEconomicFragment extends Fragment {
 
         ((MainActivity) getActivity()).setToolBar(getString(R.string.mnuSocioEconomic));
 
-        searchView = root.findViewById(R.id.socio_economic_list_search_view);
+        //searchView = root.findViewById(R.id.socio_economic_list_search_view);
         listView = root.findViewById(R.id.socio_economic_list_items);
 
         //calling the method to display component level 2 list
@@ -133,18 +133,18 @@ public class SocioEconomicFragment extends Fragment {
                                 .commit();
                     });
 
-                    searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                        @Override
-                        public boolean onQueryTextSubmit(String query) {
-                            return false;
-                        }
-
-                        @Override
-                        public boolean onQueryTextChange(String newText) {
-                            adapter.getFilter().filter(newText);
-                            return false;
-                        }
-                    });
+//                    searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+//                        @Override
+//                        public boolean onQueryTextSubmit(String query) {
+//                            return false;
+//                        }
+//
+//                        @Override
+//                        public boolean onQueryTextChange(String newText) {
+//                            adapter.getFilter().filter(newText);
+//                            return false;
+//                        }
+//                    });
                 } else {
                     listView.setAdapter(null);
                     Toast.makeText(getContext(), "Sorry, no data found!", Toast.LENGTH_LONG).show();

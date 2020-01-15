@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.SearchView;
+//import android.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -38,7 +38,7 @@ public class DeltaFragment extends Fragment {
     private DeltaViewModel deltaViewModel;
     private View root;
     private ListView listView;
-    private SearchView searchView;
+    //private SearchView searchView;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         deltaViewModel = ViewModelProviders.of(this).get(DeltaViewModel.class);
@@ -55,7 +55,7 @@ public class DeltaFragment extends Fragment {
         ((MainActivity) getActivity()).setToolBar(getString(R.string.mnuDP2100));
 
         listView = root.findViewById(R.id.delta_plan_list_items);
-        searchView = root.findViewById(R.id.delta_plan_list_search_view);
+        //searchView = root.findViewById(R.id.delta_plan_list_search_view);
 
         //calling the method to display component level 2 list
         getComponents();
@@ -130,18 +130,18 @@ public class DeltaFragment extends Fragment {
                                 .commit();
                     });
 
-                    searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                        @Override
-                        public boolean onQueryTextSubmit(String query) {
-                            return false;
-                        }
-
-                        @Override
-                        public boolean onQueryTextChange(String newText) {
-                            adapter.getFilter().filter(newText);
-                            return false;
-                        }
-                    });
+//                    searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+//                        @Override
+//                        public boolean onQueryTextSubmit(String query) {
+//                            return false;
+//                        }
+//
+//                        @Override
+//                        public boolean onQueryTextChange(String newText) {
+//                            adapter.getFilter().filter(newText);
+//                            return false;
+//                        }
+//                    });
                 } else {
                     listView.setAdapter(null);
                     Toast.makeText(getContext(), "Sorry, no data found!", Toast.LENGTH_LONG).show();

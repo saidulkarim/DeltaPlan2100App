@@ -3,8 +3,19 @@
     src: url('file:///android_asset/fonts/titillium_semi_bold.ttf');
 }
 
+body{
+    font-family: 'titillium_semi_bold';
+    font-size: 80%;
+}
+
+div {
+    width: 80%;
+    margin: auto;
+    font-size: 120% !important;
+}
+
 table {
-    font-family:'titillium_semi_bold';
+    font-family: 'titillium_semi_bold';
     border-collapse: collapse;
     width: 100%;
     font-size: 80%;

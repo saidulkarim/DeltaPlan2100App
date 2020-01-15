@@ -4,13 +4,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <SearchView
-        android:id="@+id/delta_plan_list_search_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#A3F2FD"
-        android:fontFamily="@font/titillium_semi_bold"
-        android:queryHint="Write here"></SearchView>
+<!--    <SearchView-->
+<!--        android:id="@+id/delta_plan_list_search_view"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:background="#A3F2FD"-->
+<!--        android:fontFamily="@font/titillium_semi_bold"-->
+<!--        android:queryHint="Write here"></SearchView>-->
 
     <ListView
         android:id="@+id/delta_plan_list_items"

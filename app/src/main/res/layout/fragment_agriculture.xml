@@ -4,12 +4,12 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <SearchView
-        android:id="@+id/agriculture_list_search_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#A3F2FD"
-        android:queryHint="Enter your text here"></SearchView>
+<!--    <SearchView-->
+<!--        android:id="@+id/agriculture_list_search_view"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:background="#A3F2FD"-->
+<!--        android:queryHint="Enter your text here"></SearchView>-->
 
     <ListView
         android:id="@+id/agriculture_list_items"

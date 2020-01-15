@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.SearchView;
+//import android.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -39,7 +39,7 @@ public class AgricultureFragment extends Fragment {
     private AgricultureViewModel agricultureViewModel;
     private View root;
     private ListView listView;
-    private SearchView searchView;
+    //private SearchView searchView;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         agricultureViewModel = ViewModelProviders.of(this).get(AgricultureViewModel.class);
@@ -55,7 +55,7 @@ public class AgricultureFragment extends Fragment {
 
         ((MainActivity) getActivity()).setToolBar(getString(R.string.mnuAgriculture));
 
-        searchView = root.findViewById(R.id.agriculture_list_search_view);
+        //searchView = root.findViewById(R.id.agriculture_list_search_view);
         listView = root.findViewById(R.id.agriculture_list_items);
 
         //calling the method to display component level 2 list
@@ -130,18 +130,18 @@ public class AgricultureFragment extends Fragment {
                                 .commit();
                     });
 
-                    searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-                        @Override
-                        public boolean onQueryTextSubmit(String query) {
-                            return false;
-                        }
-
-                        @Override
-                        public boolean onQueryTextChange(String newText) {
-                            adapter.getFilter().filter(newText);
-                            return false;
-                        }
-                    });
+//                    searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+//                        @Override
+//                        public boolean onQueryTextSubmit(String query) {
+//                            return false;
+//                        }
+//
+//                        @Override
+//                        public boolean onQueryTextChange(String newText) {
+//                            adapter.getFilter().filter(newText);
+//                            return false;
+//                        }
+//                    });
                 } else {
                     listView.setAdapter(null);
                     Toast.makeText(getContext(), "Sorry, no data found!", Toast.LENGTH_LONG).show();
