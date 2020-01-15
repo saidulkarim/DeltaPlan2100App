@@ -15,7 +15,7 @@ import com.cegis.deltaplan2100.utility.JustifiedTextView;
 
 public class MessageActivity extends AppCompatActivity {
     private Handler mHandler = new Handler();
-    private static int TIME_OUT = 2000;//4000;
+    private static int TIME_OUT = 3000;//6000;//4000;
 
     Animation atg;
     ImageView imageViewCircular;

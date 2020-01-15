@@ -9,6 +9,7 @@
 
     <!--start :: floating icon menu-->
     <dimen name="standard_60">60dp</dimen>
-    <dimen name="standard_110">120dp</dimen>
+    <dimen name="standard_120">120dp</dimen>
+    <dimen name="standard_180">180dp</dimen>
     <!--end-->
 </resources>

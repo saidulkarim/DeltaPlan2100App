@@ -1,10 +1,42 @@
+@font-face {
+    font-family: 'titillium_semi_bold';
+    src: url('file:///android_asset/fonts/titillium_semi_bold.ttf');
+}
+
 table {
-	  border-collapse: collapse;
-	}
-	th,
-	td {
-	  border: 1px solid #c6c7cc; padding: 10px 15px;
-	}
-	th {
-	  font-weight: bold;
-	}
+    font-family:'titillium_semi_bold';
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 80%;
+}
+
+th, td {
+    border: 1px solid #c6c7cc;
+    padding: 5px;
+}
+
+th {
+    font-weight: bold;
+}
+
+.group-header {
+    background: #D3DADF;
+    color: #237A98;
+    font-weight: bold;
+}
+
+.odd {
+    background: #F2F2F2;
+}
+
+.even {
+    background: #FAFAF7;
+}
+
+tr:nth-child(odd){
+  background-color: #F2F2F2;
+}
+
+tr:nth-child(even){
+  background-color: #FFFFFF;
+}
