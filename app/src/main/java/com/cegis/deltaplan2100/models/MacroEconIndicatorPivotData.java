@@ -11,6 +11,9 @@ public class MacroEconIndicatorPivotData {
     @SerializedName("indicator_type")
     @Expose
     private String indicatorType;
+    @SerializedName("fy_value_unit")
+    @Expose
+    private String fyValueUnit;
     @SerializedName("FY2016")
     @Expose
     private Double fY2016;
@@ -62,6 +65,14 @@ public class MacroEconIndicatorPivotData {
 
     public void setIndicatorType(String indicatorType) {
         this.indicatorType = indicatorType;
+    }
+
+    public String getFyValueUnit() {
+        return fyValueUnit;
+    }
+
+    public void setFyValueUnit(String fyValueUnit) {
+        this.fyValueUnit = fyValueUnit;
     }
 
     public Double getFY2016() {

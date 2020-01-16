@@ -1,6 +1,5 @@
 package com.cegis.deltaplan2100.ui.layer_four;
 
-import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.app.ProgressDialog;
@@ -20,7 +19,6 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -31,7 +29,6 @@ import com.cegis.deltaplan2100.MainActivity;
 import com.cegis.deltaplan2100.R;
 import com.cegis.deltaplan2100.models.MacroEconIndicatorPivotData;
 import com.cegis.deltaplan2100.models.MacroEconIndicatorsList;
-import com.cegis.deltaplan2100.ui.map.MapFragment;
 import com.cegis.deltaplan2100.utility.FontawesomeLight;
 import com.cegis.deltaplan2100.utility.GenerateHtmlContent;
 import com.github.mikephil.charting.charts.BarChart;
@@ -81,7 +78,6 @@ public class LayerFourFragment extends Fragment {
             lilaLineChart, lilaBarChart, lilaPieChartBDP, lilaPieChartBAU, lilaTableContent;
     private FontawesomeLight txtLineChart, txtBarChart, txtPieChart, txtTableView;
     private Spinner spnrMacroEconIndicator, spnrMacroEconIndicator2;
-    private Button btnViewReport;
 
     private LineChart lineChart;
     private BarChart barChart;
@@ -115,7 +111,6 @@ public class LayerFourFragment extends Fragment {
         btnBarChart = root.findViewById(R.id.btnBarChart);
         btnPieChart = root.findViewById(R.id.btnPieChart);
         btnTableView = root.findViewById(R.id.btnTableView);
-        btnViewReport = root.findViewById(R.id.btnViewReport);
 
         lilaLineChart = root.findViewById(R.id.lilaLineChart);
         lilaBarChart = root.findViewById(R.id.lilaBarChart);
@@ -167,7 +162,6 @@ public class LayerFourFragment extends Fragment {
         btnBarChart.setOnClickListener(this::onClick);
         btnPieChart.setOnClickListener(this::onClick);
         btnTableView.setOnClickListener(this::onClick);
-        btnViewReport.setOnClickListener(this::onClick);
         //endregion
 
         //region action type activity
@@ -208,20 +202,34 @@ public class LayerFourFragment extends Fragment {
             case R.id.btnLineChart:
                 if (!isChartSelected || !isLineSelected) {
                     btnLineChart.setBackgroundResource(0);
+                    txtBarChart.setTextColor(getResources().getColor(R.color.White));
                     btnBarChart.setBackgroundResource(R.drawable.bg_white);
+                    txtPieChart.setTextColor(getResources().getColor(R.color.White));
                     btnPieChart.setBackgroundResource(R.drawable.bg_white);
 
+                    txtLineChart.setTextColor(getResources().getColor(R.color.Crimson));
                     btnLineChart.setBackgroundResource(R.drawable.bg_white_selected);
+
                     isChartSelected = isLineSelected = true;
                     isBarSelected = false;
                     isPieSelected = false;
+
+                    if (isLineSelected || isBarSelected || isPieSelected || isTableSelected) {
+                        getMEIPivotData();
+                    } else {
+                        Toast.makeText(getContext(), "Please select data view", Toast.LENGTH_LONG).show();
+                    }
                 } else {
+                    txtLineChart.setTextColor(getResources().getColor(R.color.White));
                     btnLineChart.setBackgroundResource(0);
                     btnBarChart.setBackgroundResource(R.drawable.bg_white);
                     btnPieChart.setBackgroundResource(R.drawable.bg_white);
 
                     btnLineChart.setBackgroundResource(R.drawable.bg_white);
                     isChartSelected = isLineSelected = false;
+
+                    lineChart.setData(null);
+                    lilaLineChart.setVisibility(View.GONE);
                 }
                 break;
 
@@ -231,57 +239,92 @@ public class LayerFourFragment extends Fragment {
                     btnBarChart.setBackgroundResource(0);
                     btnPieChart.setBackgroundResource(R.drawable.bg_white);
 
+                    txtBarChart.setTextColor(getResources().getColor(R.color.SeaGreen));
                     btnBarChart.setBackgroundResource(R.drawable.bg_white_selected);
+
+                    txtLineChart.setTextColor(getResources().getColor(R.color.White));
+                    txtPieChart.setTextColor(getResources().getColor(R.color.White));
+
                     isChartSelected = isBarSelected = true;
                     isLineSelected = false;
                     isPieSelected = false;
+
+                    if (isLineSelected || isBarSelected || isPieSelected || isTableSelected) {
+                        getMEIPivotData();
+                    } else {
+                        Toast.makeText(getContext(), "Please select data view", Toast.LENGTH_LONG).show();
+                    }
                 } else {
                     btnLineChart.setBackgroundResource(R.drawable.bg_white);
                     btnBarChart.setBackgroundResource(0);
                     btnPieChart.setBackgroundResource(R.drawable.bg_white);
 
+                    txtBarChart.setTextColor(getResources().getColor(R.color.White));
                     btnBarChart.setBackgroundResource(R.drawable.bg_white);
                     isChartSelected = isBarSelected = false;
+
+                    barChart.setData(null);
+                    lilaBarChart.setVisibility(View.GONE);
                 }
                 break;
 
             case R.id.btnPieChart:
                 if (!isChartSelected || !isPieSelected) {
+                    txtLineChart.setTextColor(getResources().getColor(R.color.White));
                     btnLineChart.setBackgroundResource(R.drawable.bg_white);
+                    txtBarChart.setTextColor(getResources().getColor(R.color.White));
                     btnBarChart.setBackgroundResource(R.drawable.bg_white);
                     btnPieChart.setBackgroundResource(0);
 
+                    txtPieChart.setTextColor(getResources().getColor(R.color.DeepPink));
                     btnPieChart.setBackgroundResource(R.drawable.bg_white_selected);
                     isChartSelected = isPieSelected = true;
                     isBarSelected = false;
                     isLineSelected = false;
+
+                    if (isLineSelected || isBarSelected || isPieSelected || isTableSelected) {
+                        getMEIPivotData();
+                    } else {
+                        Toast.makeText(getContext(), "Please select data view", Toast.LENGTH_LONG).show();
+                    }
                 } else {
+                    txtLineChart.setTextColor(getResources().getColor(R.color.White));
                     btnLineChart.setBackgroundResource(R.drawable.bg_white);
+                    txtBarChart.setTextColor(getResources().getColor(R.color.White));
                     btnBarChart.setBackgroundResource(R.drawable.bg_white);
                     btnPieChart.setBackgroundResource(0);
 
+                    txtPieChart.setTextColor(getResources().getColor(R.color.White));
                     btnPieChart.setBackgroundResource(R.drawable.bg_white);
                     isChartSelected = isPieSelected = false;
+
+                    pieChartBDP.setData(null);
+                    lilaPieChartBDP.setVisibility(View.GONE);
+                    pieChartBAU.setData(null);
+                    lilaPieChartBAU.setVisibility(View.GONE);
                 }
                 break;
 
             case R.id.btnTableView:
                 if (!isTableSelected) {
                     btnTableView.setBackgroundResource(0);
+                    txtTableView.setTextColor(getResources().getColor(R.color.ForestGreen));
                     btnTableView.setBackgroundResource(R.drawable.bg_white_selected);
                     isTableSelected = true;
+
+                    if (isLineSelected || isBarSelected || isPieSelected || isTableSelected) {
+                        getMEIPivotData();
+                    } else {
+                        Toast.makeText(getContext(), "Please select data view", Toast.LENGTH_LONG).show();
+                    }
                 } else {
                     btnTableView.setBackgroundResource(0);
+                    txtTableView.setTextColor(getResources().getColor(R.color.White));
                     btnTableView.setBackgroundResource(R.drawable.bg_white);
                     isTableSelected = false;
-                }
-                break;
 
-            case R.id.btnViewReport:
-                if (isLineSelected || isBarSelected || isPieSelected || isTableSelected) {
-                    getMEIPivotData();
-                } else {
-                    Toast.makeText(getContext(), "Please select data view", Toast.LENGTH_LONG).show();
+                    lilaTableContent.setVisibility(View.GONE);
+                    webViewTblContent.loadDataWithBaseURL(null, "", "text/HTML", "UTF-8", null);
                 }
                 break;
 
@@ -354,9 +397,7 @@ public class LayerFourFragment extends Fragment {
                         List<MacroEconIndicatorPivotData> responseList = response.body();
 
                         if (responseList.size() > 0) {
-                            for (int i = 0; i < responseList.size(); i++) {
-                                lstMEIPivotData.add(responseList.get(i));
-                            }
+                            lstMEIPivotData.addAll(responseList);
 
                             if (isLineSelected) {
                                 lilaLineChart.setVisibility(View.VISIBLE);

@@ -39,6 +39,7 @@
         android:orientation="horizontal"
         android:weightSum="4">
 
+        <!--line chart-->
         <LinearLayout
             android:id="@+id/btnLineChart"
             android:layout_width="0dp"
@@ -62,7 +63,9 @@
                 android:textColor="@color/colorWhite"
                 android:textSize="45dp" />
         </LinearLayout>
+        <!--line chart-->
 
+        <!--bar chart-->
         <LinearLayout
             android:id="@+id/btnBarChart"
             android:layout_width="0dp"
@@ -86,7 +89,9 @@
                 android:textColor="@color/colorWhite"
                 android:textSize="45dp" />
         </LinearLayout>
+        <!--bar chart-->
 
+        <!--pie chart-->
         <LinearLayout
             android:id="@+id/btnPieChart"
             android:layout_width="0dp"
@@ -134,34 +139,11 @@
                 android:textColor="@color/colorWhite"
                 android:textSize="45dp" />
         </LinearLayout>
+        <!--pie chart-->
     </LinearLayout>
     <!-- First Row-->
 
     <!-- Second Row-->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginRight="10dp"
-        android:orientation="horizontal"
-        android:weightSum="1">
-
-        <Button
-            android:id="@+id/btnViewReport"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/bg_white_selected"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground"
-            android:gravity="center|center"
-            android:text="View Report"
-            android:tint="@color/DarkSlateGray" />
-    </LinearLayout>
-    <!-- Second Row-->
-
-    <!-- Third Row-->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -186,7 +168,9 @@
                 <com.github.mikephil.charting.charts.LineChart
                     android:id="@+id/lineChart"
                     android:layout_width="match_parent"
-                    android:layout_height="250dp" />
+                    android:layout_height="250dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp" />
             </LinearLayout>
 
             <!--Bar Chart-->
@@ -270,5 +254,5 @@
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
-    <!-- Third Row-->
+    <!-- Second Row-->
 </LinearLayout>

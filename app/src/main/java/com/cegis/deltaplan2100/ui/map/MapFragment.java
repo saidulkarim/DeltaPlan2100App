@@ -345,9 +345,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
     //lged project layer
     private void addLgedProjLayerToMap(@NonNull Style style) {
         try {
-            String url = "https://130.180.3.215/AppMaps/lgedprj.json";
-            GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI(url));
-            //GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI("asset://lgedprj.json"));
+            //String url = "https://130.180.3.215/AppMaps/lgedprj.json";
+            //GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI(url));
+            GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI("asset://lgedprj.json"));
 
             style.addSource(source);
 
