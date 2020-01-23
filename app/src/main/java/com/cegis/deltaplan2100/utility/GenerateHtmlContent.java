@@ -21,9 +21,7 @@ public class GenerateHtmlContent {
                 "<head>" +
                 "<link rel=\"stylesheet\" href=\"file:///android_asset/style.css\" />" +
                 "</head>" +
-                "<body>" +
-                "<table>" + rawContent + "</table>" +
-                "</body>" +
+                "<body><table>" + rawContent + "</table></body>" +
                 "</html>";
 
         return content;

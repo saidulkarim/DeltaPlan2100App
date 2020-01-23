@@ -19,6 +19,7 @@ import androidx.appcompat.widget.TooltipCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.cegis.deltaplan2100.API;
 import com.cegis.deltaplan2100.MainActivity;
 import com.cegis.deltaplan2100.R;
 import com.cegis.deltaplan2100.utility.GenerateHtmlContent;
@@ -114,7 +115,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
 
     private static final String MAP_MARKER_ICON = "map_marker_icon";
 
-    Typeface tf;
+    private Typeface tf;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -276,6 +277,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
     //base layer :: administrative boundary
     private void addAdminBoundaryLayerToMap(@NonNull Style style) {
         try {
+            //URI geoJsonUrl = new URI(API.MAP_BASE_URL + "bgd.json");
+            //GeoJsonSource source = new GeoJsonSource(ADMIN_BOUNDARY_LAYER, geoJsonUrl);
+
             GeoJsonSource source = new GeoJsonSource(ADMIN_BOUNDARY_LAYER, new URI("asset://bgd.json"));
             style.addSource(source);
 
@@ -290,7 +294,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
                             fillColor(Color.parseColor("#F2F2F2")), fillOpacity(0.8f)
                     ));
         } catch (Throwable throwable) {
-            Snackbar.make(this.getView(), "Couldn't add GeoJsonSource to map - %s", Snackbar.LENGTH_LONG)
+            Snackbar.make(this.getView(), "Couldn't add admin boundary source to map", Snackbar.LENGTH_LONG)
                     .setAction("Action", null)
                     .show();
         }
@@ -300,6 +304,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
     //bwdb project layer
     private void addBwdbProjLayerToMap(@NonNull Style style) {
         try {
+            //URI geoJsonUrl = new URI("http://202.53.173.179:9090/geoserver/BDP/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=BDP:Jamuna_89&maxFeatures=50&outputFormat=application/json");
+            //GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, geoJsonUrl);
+
             GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI("asset://bwdbprj.json"));
             style.addSource(source);
 
@@ -335,7 +342,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
                 layer.setProperties(visibility(NONE));
             }
         } catch (Throwable throwable) {
-            Snackbar.make(this.getView(), "Couldn't add BWDB to map - %s", Snackbar.LENGTH_LONG)
+            Snackbar.make(this.getView(), "Couldn't add BWDB source to map", Snackbar.LENGTH_LONG)
                     .setAction("Action", null)
                     .show();
         }
@@ -520,7 +527,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
         fab2.animate().translationY(-this.getResources().getDimension(R.dimen.standard_120));
 
         fab3.animate().translationX(-this.getResources().getDimension(R.dimen.standard_60));
-        fab4.animate().translationX(-this.getResources().getDimension(R.dimen.standard_120));
+        fab4.animate().translationX(-this.getResources().getDimension(R.dimen.standard_60));
     }
 
     private void closeFloatingMenu() {

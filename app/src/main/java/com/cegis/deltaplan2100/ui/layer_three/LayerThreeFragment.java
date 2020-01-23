@@ -33,6 +33,8 @@ import com.cegis.deltaplan2100.utility.GenerateHtmlContent;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -131,38 +133,60 @@ public class LayerThreeFragment extends Fragment {
     }
 
     private void getTextTableHtmlContent() {
-        ProgressDialog dialog = ProgressDialog.show(getActivity(), "", "Please wait...", true);
+        if (groupHeader.equals("Delta Challenges")) {
+            webView.loadDataWithBaseURL("file:///android_asset/", readAssetFileAsString("delta_challanges.html"), "text/html", "UTF-8", null);
+        } else {
+            ProgressDialog dialog = ProgressDialog.show(getActivity(), "", "Please wait...", true);
 
-        Gson gson = new GsonBuilder()
-                .setLenient()
-                .create();
-        OkHttpClient okHttpClient = API.getUnsafeOkHttpClient();
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(API.BASE_URL)
-                .client(okHttpClient)
-                .addConverterFactory(ScalarsConverterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
+            Gson gson = new GsonBuilder()
+                    .setLenient()
+                    .create();
+            OkHttpClient okHttpClient = API.getUnsafeOkHttpClient();
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(API.BASE_URL)
+                    .client(okHttpClient)
+                    .addConverterFactory(ScalarsConverterFactory.create())
+                    .addConverterFactory(GsonConverterFactory.create(gson))
+                    .build();
 
-        API api = retrofit.create(API.class);
-        Call call = api.getTextTableHtmlContent(itemID, itemParentLevel, itemContentAs);
+            API api = retrofit.create(API.class);
+            Call call = api.getTextTableHtmlContent(itemID, itemParentLevel, itemContentAs);
 
-        call.enqueue(new Callback() {
-            @Override
-            public void onResponse(Call call, Response response) {
-                dialog.dismiss();
-                String content = response.body().toString();
-                content = GenerateHtmlContent.getHtmlTable(content);
+            call.enqueue(new Callback() {
+                @Override
+                public void onResponse(Call call, Response response) {
+                    dialog.dismiss();
+                    String content = response.body().toString();
+                    content = GenerateHtmlContent.getHtmlTable(content);
 
-                webView.loadDataWithBaseURL(null, content, "text/HTML", "UTF-8", null);
-            }
+                    webView.loadDataWithBaseURL(null, content, "text/HTML", "UTF-8", null);
+                }
 
-            @Override
-            public void onFailure(Call call, Throwable t) {
-                dialog.dismiss();
-                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
+                @Override
+                public void onFailure(Call call, Throwable t) {
+                    dialog.dismiss();
+                    Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+    }
+
+    private String readAssetFileAsString(String sourceHtmlLocation) {
+        InputStream is;
+        try {
+            is = getContext().getAssets().open(sourceHtmlLocation);
+            int size = is.available();
+
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+
+            return new String(buffer, "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return "";
     }
 
     private void getComponents() {

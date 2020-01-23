@@ -153,8 +153,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_settings) {
-            Toast.makeText(MainActivity.this, "Setting Button Clicked!", Toast.LENGTH_SHORT).show();
+        if (item.getItemId() == R.id.action_about) {
+            Toast.makeText(MainActivity.this, "About Us info", Toast.LENGTH_SHORT).show();
 
             //Intent cIntent = new Intent(MainActivity.this, ClimateActivity.class);
             Intent cIntent = new Intent(MainActivity.this, MainActivity.class);
@@ -163,15 +163,16 @@ public class MainActivity extends AppCompatActivity {
             //Intent aIntent = new Intent(MainActivity.this, MapActivity.class);
             Intent aIntent = new Intent(MainActivity.this, MainActivity.class);
             startActivity(aIntent);
-        } else if (item.getItemId() == R.id.action_symbol_layer_info) {
-            //Intent aIntent = new Intent(MainActivity.this, LayerMap.class);
-            Intent aIntent = new Intent(MainActivity.this, MainActivity.class);
-            startActivity(aIntent);
-        } else if (item.getItemId() == R.id.activity_draw_geojson_line) {
-            //Intent aIntent = new Intent(MainActivity.this, DrawGeojsonLineActivity.class);
-            Intent aIntent = new Intent(MainActivity.this, MainActivity.class);
-            startActivity(aIntent);
         }
+        //else if (item.getItemId() == R.id.action_symbol_layer_info) {
+        //            //Intent aIntent = new Intent(MainActivity.this, LayerMap.class);
+        //            Intent aIntent = new Intent(MainActivity.this, MainActivity.class);
+        //            startActivity(aIntent);
+        //        } else if (item.getItemId() == R.id.activity_draw_geojson_line) {
+        //            //Intent aIntent = new Intent(MainActivity.this, DrawGeojsonLineActivity.class);
+        //            Intent aIntent = new Intent(MainActivity.this, MainActivity.class);
+        //            startActivity(aIntent);
+        //        }
 
         return super.onOptionsItemSelected(item);
     }

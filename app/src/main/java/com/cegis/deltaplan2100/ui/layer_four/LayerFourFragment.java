@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -34,7 +35,9 @@ import com.cegis.deltaplan2100.utility.GenerateHtmlContent;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
@@ -54,6 +57,8 @@ import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -520,7 +525,6 @@ public class LayerFourFragment extends Fragment {
 //        leftAxis.setDrawLimitLinesBehindData(false);
 
         lineChart.getAxisRight().setEnabled(false);
-        lineChart.getDescription().setText(indicatorName);
         //endregion
 
         //region set data
@@ -556,6 +560,16 @@ public class LayerFourFragment extends Fragment {
 
         LineData data = new LineData(dataSets);
         lineChart.setData(data);
+
+        //lineChart.getDescription().setText(indicatorName);
+        int width = lineChart.getWidth();
+        int height = lineChart.getHeight();
+        Description desc = new Description();
+        desc.setText(indicatorName + " (" + lstMEIPivotData.get(0).getFyValueUnit() + ")");
+        desc.setTextSize(13f);
+        desc.setPosition(width - 200, height - (height - 30));
+        lineChart.setDescription(desc);
+
         lineChart.invalidate();
         //endregion
     }
@@ -593,6 +607,10 @@ public class LayerFourFragment extends Fragment {
         xAxis.setGranularity(1);
         xAxis.setGranularityEnabled(true);
 
+        //YAxis yAxisLeft = barChart.getAxisLeft();
+        //yAxisLeft.set
+        //barChart.yAxis(0).title("Y-Axis with labels");
+
         barChart.setDragEnabled(true);
         barChart.setVisibleXRangeMaximum(3);
         barChart.getXAxis().setDrawGridLines(true);
@@ -615,7 +633,19 @@ public class LayerFourFragment extends Fragment {
         barChart.getAxisLeft().setAxisMinimum(0);
 
         barChart.groupBars(0, groupSpace, barSpace);
-        barChart.getDescription().setText(indicatorName);
+
+        int width = barChart.getWidth();
+        int height = barChart.getHeight();
+        Description desc = new Description();
+        desc.setText(indicatorName + " (" + lstMEIPivotData.get(0).getFyValueUnit() + ")");
+        desc.setTextSize(13f);
+        desc.setPosition(width - 200, height - (height - 30));
+        barChart.setDescription(desc);
+
+        //Toast.makeText(getContext(), width + " :: wh :: " + height, Toast.LENGTH_SHORT).show();
+        //barChart.getDescription().setText(indicatorName + " (" + lstMEIPivotData.get(0).getFyValueUnit() + ")");
+        //barChart.getDescription().setPosition(width - 200, height - (height - 25));
+
         barChart.animateXY(1000, 1000);
         barChart.invalidate();
 
@@ -704,6 +734,15 @@ public class LayerFourFragment extends Fragment {
             pieChartBDP.setEntryLabelColor(R.color.DeepGray);
             pieChartBDP.setEntryLabelTextSize(10f);
             pieChartBDP.animateXY(1500, 1500);
+
+//            int width = pieChartBDP.getWidth();
+//            int height = pieChartBDP.getHeight();
+//            Description desc = new Description();
+//            desc.setText(indicatorName + " (" + lstMEIPivotData.get(0).getFyValueUnit() + ")");
+//            desc.setTextSize(13f);
+//            desc.setPosition(width - 200, height - (height - 30));
+//            pieChartBDP.setDescription(desc);
+
             pieChartBDP.invalidate();
 
             pieChartBDP.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
@@ -741,6 +780,14 @@ public class LayerFourFragment extends Fragment {
             pieChartBAU.setEntryLabelColor(R.color.DeepGray);
             pieChartBAU.setEntryLabelTextSize(10f);
             pieChartBAU.animateXY(1500, 1500);
+
+//            width = pieChartBAU.getWidth();
+//            height = pieChartBAU.getHeight();
+//            desc = new Description();
+//            desc.setText(indicatorName + " (" + lstMEIPivotData.get(0).getFyValueUnit() + ")");
+//            desc.setTextSize(13f);
+//            desc.setPosition(width - 200, height - (height - 30));
+//            pieChartBAU.setDescription(desc);
 
             pieChartBAU.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
                 @Override
@@ -800,7 +847,7 @@ public class LayerFourFragment extends Fragment {
                     "\t\t<table>\n" +
                     "\t\t\t<tbody>\n" +
                     "\t\t\t\t<tr>\n" +
-                    "\t\t\t\t\t<td class=\"group-header\" colspan=\"3\">Indicator: " + indicatorName + "</td>\n" +
+                    "\t\t\t\t\t<td class=\"group-header\" colspan=\"3\">Indicator: " + indicatorName + " (" + lstMEIPivotData.get(0).getFyValueUnit() + ")" + "</td>\n" +
                     "\t\t\t\t</tr>\n" +
                     "\t\t\t\t<tr>\n" +
                     "\t\t\t\t\t<td class=\"group-header\" style=\"text-align: center;\"></td>\n" +
@@ -899,38 +946,61 @@ public class LayerFourFragment extends Fragment {
     }
 
     private void getTextTableHtmlContent() {
-        ProgressDialog dialog = ProgressDialog.show(getActivity(), "", "Please wait...", true);
+        Toast.makeText(getContext(), groupHeader, Toast.LENGTH_LONG).show();
 
-        Gson gson = new GsonBuilder()
-                .setLenient()
-                .create();
-        OkHttpClient okHttpClient = API.getUnsafeOkHttpClient();
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(API.BASE_URL)
-                .client(okHttpClient)
-                .addConverterFactory(ScalarsConverterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
+        if (groupHeader.equals("Delta Challenges")) {
+            webViewTblContent.loadDataWithBaseURL("file:///android_asset/", readAssetFileAsString("delta_challanges.html"), "text/html", "UTF-8", null);
+        } else {
+            ProgressDialog dialog = ProgressDialog.show(getActivity(), "", "Please wait...", true);
 
-        API api = retrofit.create(API.class);
-        Call call = api.getTextTableHtmlContent(itemID, itemParentLevel, itemContentAs);
+            Gson gson = new GsonBuilder()
+                    .setLenient()
+                    .create();
+            OkHttpClient okHttpClient = API.getUnsafeOkHttpClient();
+            Retrofit retrofit = new Retrofit.Builder()
+                    .baseUrl(API.BASE_URL)
+                    .client(okHttpClient)
+                    .addConverterFactory(ScalarsConverterFactory.create())
+                    .addConverterFactory(GsonConverterFactory.create(gson))
+                    .build();
 
-        call.enqueue(new Callback() {
-            @Override
-            public void onResponse(Call call, Response response) {
-                dialog.dismiss();
-                String content = response.body().toString();
-                content = GenerateHtmlContent.getHtmlTable(content);
+            API api = retrofit.create(API.class);
+            Call call = api.getTextTableHtmlContent(itemID, itemParentLevel, itemContentAs);
 
-                webViewTblContent.loadDataWithBaseURL(null, content, "text/HTML", "UTF-8", null);
-            }
+            call.enqueue(new Callback() {
+                @Override
+                public void onResponse(Call call, Response response) {
+                    dialog.dismiss();
+                    String content = response.body().toString();
+                    content = GenerateHtmlContent.getHtmlTable(content);
+                    webViewTblContent.loadDataWithBaseURL(null, content, "text/HTML", "UTF-8", null);
+                }
 
-            @Override
-            public void onFailure(Call call, Throwable t) {
-                dialog.dismiss();
-                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
+                @Override
+                public void onFailure(Call call, Throwable t) {
+                    dialog.dismiss();
+                    Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+    }
+
+    private String readAssetFileAsString(String sourceHtmlLocation) {
+        InputStream is;
+        try {
+            is = getContext().getAssets().open(sourceHtmlLocation);
+            int size = is.available();
+
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+
+            return new String(buffer, "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return "";
     }
 
     private String getFieldNamesAndValues(String fieldName, MacroEconIndicatorPivotData data) {

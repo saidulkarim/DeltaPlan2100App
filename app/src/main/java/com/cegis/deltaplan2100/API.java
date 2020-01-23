@@ -5,6 +5,7 @@ import com.cegis.deltaplan2100.models.MacroEconIndicatorsList;
 import com.cegis.deltaplan2100.models.ModelComponentLevelOne;
 import com.cegis.deltaplan2100.models.ModelComponentLevelThree;
 import com.cegis.deltaplan2100.models.ModelComponentLevelTwo;
+import com.cegis.deltaplan2100.models.ModelSendFeedback;
 
 import java.security.cert.CertificateException;
 import java.util.List;
@@ -16,13 +17,21 @@ import javax.net.ssl.X509TrustManager;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
+import retrofit2.http.Body;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
+import retrofit2.http.POST;
 import retrofit2.http.Path;
 
 public interface API {
     //String BASE_URL = "http://130.180.3.215:8080/api/";
-    String BASE_URL = "https://130.180.3.215/api/";
+    //String BASE_URL = "https://130.180.3.215/api/";
+    String BASE_URL = "https://202.53.173.179/BDP2100API/api/"; //online server
+
+    //String MAP_BASE_URL = "https://130.180.3.215/AppMaps/";
+    //String MAP_BASE_URL = "https://202.53.173.179/BDP2100API/AppMaps/"; //online server
 
     static OkHttpClient getUnsafeOkHttpClient() {
         try {
@@ -99,6 +108,18 @@ public interface API {
 
     @GET("Content/MacroEconIndicatorPivotData/{indicator_name}")
     Call<List<MacroEconIndicatorPivotData>> getMacroEconIndiPivotDataList(@Path("indicator_name") String indicator_name);
+
+//    @FormUrlEncoded
+//    @POST("Content/SendFeedback")
+//    Call<String> sendFeedback(@Body ModelSendFeedback modelSendFeedback);
+
+//    @FormUrlEncoded
+//    @POST("Content/SendFeedback")
+//    Call<String> sendFeedback(@Field("user_name") String uName, @Field("phone_no") String phoneNo, @Field("user_email") String uEmail, @Field("user_comment") String uComment);
+
+
+    @POST("Content/SendFeedback")
+    Call<String> sendFeedback(String user_name, String phone_no, String user_email, String user_comment);
 }
 
 

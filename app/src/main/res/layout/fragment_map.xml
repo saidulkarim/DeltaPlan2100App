@@ -65,7 +65,6 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:background="#66F0F0F0"
-        android:backgroundTint="@color/Purple"
         android:clickable="true"
         android:scaleType="fitXY"
         android:src="@drawable/ic_base_layer_24"
@@ -81,7 +80,6 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:background="#66F0F0F0"
-        android:backgroundTint="@color/Purple"
         android:clickable="true"
         android:scaleType="fitXY"
         android:src="@drawable/ic_label_24"
@@ -97,7 +95,6 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:background="#66F0F0F0"
-        android:backgroundTint="@color/Purple"
         android:clickable="true"
         android:scaleType="fitXY"
         android:src="@drawable/ic_location_24"
@@ -106,22 +103,6 @@
 
     <!--full screen-->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab3"
-        style="@style/Widget.Design.FloatingActionButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:background="#66F0F0F0"
-        android:backgroundTint="@color/Purple"
-        android:clickable="true"
-        android:scaleType="fitXY"
-        android:src="@drawable/ic_fullscreen_24"
-        android:tint="@color/White"
-        app:borderWidth="0dp" />
-
-    <!--exit full screen-->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab4"
         style="@style/Widget.Design.FloatingActionButton"
         android:layout_width="wrap_content"
@@ -129,10 +110,25 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:background="#66F0F0F0"
-        android:backgroundTint="@color/Purple"
         android:clickable="true"
         android:scaleType="fitXY"
         android:src="@drawable/ic_fullscreen_exit_24"
+        android:tint="@color/White"
+        app:borderWidth="0dp" />
+
+    <!--exit full screen-->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab3"
+        style="@style/Widget.Design.FloatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:background="#66F0F0F0"
+        android:clickable="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/ic_fullscreen_24"
+        android:visibility="gone"
         android:tint="@color/White"
         app:borderWidth="0dp" />
 
@@ -143,7 +139,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="16dp"
-        android:backgroundTint="@color/Purple"
+
         android:scaleType="fitXY"
         android:src="@drawable/ic_menu_24"
         android:tint="@color/White"
