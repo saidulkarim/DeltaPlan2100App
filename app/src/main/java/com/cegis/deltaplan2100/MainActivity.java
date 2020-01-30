@@ -154,10 +154,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_about) {
-            Toast.makeText(MainActivity.this, "About Us info", Toast.LENGTH_SHORT).show();
-
-            //Intent cIntent = new Intent(MainActivity.this, ClimateActivity.class);
-            Intent cIntent = new Intent(MainActivity.this, MainActivity.class);
+            Intent cIntent = new Intent(MainActivity.this, About.class);
             startActivity(cIntent);
         } else if (item.getItemId() == R.id.action_about) {
             //Intent aIntent = new Intent(MainActivity.this, MapActivity.class);

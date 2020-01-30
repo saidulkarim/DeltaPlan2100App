@@ -27,11 +27,12 @@ import retrofit2.http.Path;
 
 public interface API {
     //String BASE_URL = "http://130.180.3.215:8080/api/";
-    //String BASE_URL = "https://130.180.3.215/api/";
-    String BASE_URL = "https://202.53.173.179/BDP2100API/api/"; //online server
+    String BASE_URL = "https://130.180.3.215/api/";
+    //String BASE_URL = "https://202.53.173.179/BDP2100API/api/"; //online server
 
+    //String MAP_BASE_URL = "http://130.180.3.215:7669/AppMaps/";
     //String MAP_BASE_URL = "https://130.180.3.215/AppMaps/";
-    //String MAP_BASE_URL = "https://202.53.173.179/BDP2100API/AppMaps/"; //online server
+    String MAP_BASE_URL = "https://202.53.173.179/BDP2100AppMap/AppMaps/"; //online server
 
     static OkHttpClient getUnsafeOkHttpClient() {
         try {
@@ -117,9 +118,12 @@ public interface API {
 //    @POST("Content/SendFeedback")
 //    Call<String> sendFeedback(@Field("user_name") String uName, @Field("phone_no") String phoneNo, @Field("user_email") String uEmail, @Field("user_comment") String uComment);
 
-
     @POST("Content/SendFeedback")
     Call<String> sendFeedback(String user_name, String phone_no, String user_email, String user_comment);
+
+    @Headers("Content-Type: application/json")
+    @GET("Map/GetLgedMapLayer")
+    Call<String> getLgedMapLayer();
 }
 
 

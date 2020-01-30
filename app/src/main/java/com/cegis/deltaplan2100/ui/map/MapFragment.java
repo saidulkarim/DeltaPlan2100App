@@ -6,12 +6,15 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -22,11 +25,17 @@ import androidx.lifecycle.ViewModelProviders;
 import com.cegis.deltaplan2100.API;
 import com.cegis.deltaplan2100.MainActivity;
 import com.cegis.deltaplan2100.R;
+import com.cegis.deltaplan2100.models.MacroEconIndicatorPivotData;
 import com.cegis.deltaplan2100.utility.GenerateHtmlContent;
+import com.cegis.deltaplan2100.utility.GetJsonResponse;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mapbox.geojson.Feature;
+import com.mapbox.geojson.FeatureCollection;
+import com.mapbox.geojson.GeoJson;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
@@ -40,15 +49,59 @@ import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
+import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
+import com.mapbox.mapboxsdk.utils.*;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
+
+import okhttp3.Headers;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+//import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
+import retrofit2.http.Url;
+
+import static com.github.mikephil.charting.charts.Chart.LOG_TAG;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.exponential;
 import static com.mapbox.mapboxsdk.style.layers.Property.TEXT_ANCHOR_BOTTOM;
 import static com.mapbox.mapboxsdk.style.layers.Property.TEXT_ANCHOR_LEFT;
@@ -175,6 +228,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
         mapView.getMapAsync(this);
         //endregion
 
+        try {
+            executeRequest();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         return root;
     }
 
@@ -202,6 +261,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
                     addBwdbProjLayerToMap(style);
                 } else if (groupHeader.toLowerCase().contains("lged")) {
                     addLgedProjLayerToMap(style);
+                } else if (groupHeader.toLowerCase().contains("flood prone")) {
+                    addFloodProneLayerToMap(style);
+                } else if (groupHeader.toLowerCase().contains("ground water zone")) {
+                    addGroundWaterZoneLayerToMap(style);
+                } else if (groupHeader.toLowerCase().contains("salinity area")) {
+                    addSoilSalinityAreaLayerToMap(style);
                 }
             }
         });
@@ -243,14 +308,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
 
             for (Feature feature : featureList) {
                 if (feature.properties() != null) {
-                    if (groupHeader.toLowerCase().contains("bwdb")) {
-                        prjName = feature.properties().get("SNAME").toString().replaceAll(regex, "");
-                    } else if (groupHeader.toLowerCase().contains("lged")) {
-                        prjName = feature.properties().get("SPNAME").toString().replaceAll(regex, "");
-                    }
+                    try {
+                        if (groupHeader.toLowerCase().contains("bwdb")) {
+                            prjName = feature.properties().get("SNAME").toString().replaceAll(regex, "");
+                        } else if (groupHeader.toLowerCase().contains("lged")) {
+                            prjName = feature.properties().get("SPNAME").toString().replaceAll(regex, "");
+                        } else if (groupHeader.toLowerCase().contains("flood prone")) {
+                            prjName = feature.properties().get("TYPE").toString().replaceAll(regex, "");
+                        } else if (groupHeader.toLowerCase().contains("ground water zone")) {
+                            prjName = feature.properties().get("GW_TABLE_M").toString().replaceAll(regex, "");
+                        } else if (groupHeader.toLowerCase().contains("salinity area")) {
+                            prjName = feature.properties().get("TYPE").toString().replaceAll(regex, "");
+                        }
 
-                    tv.setText(prjName);
-                    tv.setTypeface(tf);
+                        tv.setText(prjName);
+                        tv.setTypeface(tf);
+                    } catch (Exception ex) {
+
+                    }
 
                     htmlRawContent = new String();
                     for (String key : keyArray) {
@@ -263,7 +338,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
                     AlertDialog alertDialog = builder.create();
                     alertDialog.show();
 
-                    btnOk.setOnClickListener(v -> alertDialog.dismiss());
+                    try {
+                        btnOk.setOnClickListener(v -> alertDialog.dismiss());
+                    } catch (Exception ex) {
+
+                    }
                 }
             }
 
@@ -273,14 +352,101 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
         return false;
     }
 
+    public void executeRequest() throws IOException {
+        String url = "http://202.53.173.179:9090/geoserver/BDP/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=BDP:LGEDProjectBoundary&maxFeatures=50&outputFormat=application/json";
+        //https://square.github.io/okhttp/recipes/
+
+        String res = GetJsonResponse.doGetRequest(url);
+        Snackbar.make(this.getView(), res.substring(0, 5), Snackbar.LENGTH_LONG)
+                .setAction("Action", null)
+                .show();
+//        try {
+//            Gson gson = new GsonBuilder()
+//                    .setLenient()
+//                    .create();
+//
+//            OkHttpClient okHttpClient = API.getUnsafeOkHttpClient();
+//            Retrofit retrofit = new Retrofit.Builder()
+//                    .baseUrl(url)
+//                    .client(okHttpClient)
+//                    .addConverterFactory(ScalarsConverterFactory.create())
+//                    .addConverterFactory(GsonConverterFactory.create(gson))
+//                    .build();
+//
+//            API api = retrofit.create(API.class);
+//            Call call = api.getLgedMapLayer();
+//
+//            call.enqueue(new Callback<String>() {
+//                @Override
+//                public void onResponse(Call<String> call, Response<String> response) {
+//                    if (response.isSuccessful()) {
+//                        try {
+//                            String res = response.body();
+//                            Log.i("Map API Call: ", res);
+//                        } catch (Exception e) {
+//                            e.printStackTrace();
+//                        }
+//                    } else {
+//                        Toast.makeText(getContext(), "Map Response not found.", Toast.LENGTH_LONG).show();
+//                    }
+//                }
+//
+//                @Override
+//                public void onFailure(Call<String> call, Throwable t) {
+//                    Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_LONG).show();
+//                }
+//            });
+//        } catch (Exception ex) {
+//            //Log.i("Map API Call Error: ", ex.getMessage());
+//        }
+    }
+
     //layer position: 1
     //base layer :: administrative boundary
     private void addAdminBoundaryLayerToMap(@NonNull Style style) {
         try {
-            //URI geoJsonUrl = new URI(API.MAP_BASE_URL + "bgd.json");
-            //GeoJsonSource source = new GeoJsonSource(ADMIN_BOUNDARY_LAYER, geoJsonUrl);
+//            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+//            InputStream caInput = new BufferedInputStream(getResources().openRawResource(R.raw.dp2100_api_cert));
+//            Certificate ca;
+//
+//            try {
+//                ca = cf.generateCertificate(caInput);
+//                System.out.println("ca=" + ((X509Certificate) ca).getSubjectDN());
+//            } finally {
+//                caInput.close();
+//            }
+//
+//            // Create a KeyStore containing our trusted CAs
+//            String keyStoreType = KeyStore.getDefaultType();
+//            KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+//            keyStore.load(null, null);
+//            keyStore.setCertificateEntry("ca", ca);
+//
+//            // Create a TrustManager that trusts the CAs in our KeyStore
+//            String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+//            TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+//            tmf.init(keyStore);
+//
+//            // Create an SSLContext that uses our TrustManager
+//            SSLContext context = SSLContext.getInstance("TLS");
+//            context.init(null, tmf.getTrustManagers(), null);
+//
+//            // Tell the URLConnection to use a SocketFactory from our SSLContext
+//            URL url = new URL(API.MAP_BASE_URL + "admin/bgd.json");
+//
+//            HttpsURLConnection urlConnection =
+//                    (HttpsURLConnection) url.openConnection();
+//            urlConnection.setSSLSocketFactory(context.getSocketFactory());
+//
+//            InputStream in = urlConnection.getInputStream();
+//            //copyInputStreamToOutputStream(in, System.out);
 
-            GeoJsonSource source = new GeoJsonSource(ADMIN_BOUNDARY_LAYER, new URI("asset://bgd.json"));
+            //URL url = new URL(API.MAP_BASE_URL + "admin/bgd.json");
+
+            //URI uri = new URI(API.MAP_BASE_URL + "admin/bgd.json");
+            //GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, uri);
+
+            GeoJsonSource source = new GeoJsonSource(ADMIN_BOUNDARY_LAYER, new URI("asset://admin/bgd.json"));
             style.addSource(source);
 
             style.addLayer(new LineLayer(ADMIN_BOUNDARY_LINE_LAYER, ADMIN_BOUNDARY_LAYER)
@@ -304,14 +470,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
     //bwdb project layer
     private void addBwdbProjLayerToMap(@NonNull Style style) {
         try {
-            //URI geoJsonUrl = new URI("http://202.53.173.179:9090/geoserver/BDP/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=BDP:Jamuna_89&maxFeatures=50&outputFormat=application/json");
-            //GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, geoJsonUrl);
+            //URI uri = new URI(API.MAP_BASE_URL + "water_resources_wgs84/bwdbprj.json");
+            //GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, uri);
 
-            GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI("asset://bwdbprj.json"));
+            GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI("asset://water_resources_wgs84/bwdbprj.json"));
             style.addSource(source);
 
-            FillLayer lgedprjArea = new FillLayer(PROJECT_FILL_LAYER, PROJECT_LAYER);
-            lgedprjArea.setProperties(
+            FillLayer fillLayer = new FillLayer(PROJECT_FILL_LAYER, PROJECT_LAYER);
+            fillLayer.setProperties(
                     fillColor(Color.parseColor("#65A0C3")),
                     fillOpacity(0.8f)
             );
@@ -333,7 +499,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
                             iconOffset(new Float[]{0f, -2f})
                     );
 
-            style.addLayerAbove(lgedprjArea, ADMIN_BOUNDARY_FILL_LAYER);
+            style.addLayerAbove(fillLayer, ADMIN_BOUNDARY_FILL_LAYER);
             style.addLayerAbove(labelLayer, PROJECT_FILL_LAYER);
             style.addLayerAbove(symbolLayer, PROJECT_LABEL_LAYER);
 
@@ -352,14 +518,14 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
     //lged project layer
     private void addLgedProjLayerToMap(@NonNull Style style) {
         try {
-            //String url = "https://130.180.3.215/AppMaps/lgedprj.json";
-            //GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI(url));
-            GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI("asset://lgedprj.json"));
+            //URI uri = new URI(API.MAP_BASE_URL + "water_resources_wgs84/lgedprj.json");
+            //GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, uri);
 
+            GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI("asset://water_resources_wgs84/lgedprj.json"));
             style.addSource(source);
 
-            FillLayer lgedprjArea = new FillLayer(PROJECT_FILL_LAYER, PROJECT_LAYER);
-            lgedprjArea.setProperties(
+            FillLayer fillLayer = new FillLayer(PROJECT_FILL_LAYER, PROJECT_LAYER);
+            fillLayer.setProperties(
                     fillColor(Color.parseColor("#65A0C3")),
                     fillOpacity(0.8f)
             );
@@ -381,7 +547,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
                             iconOffset(new Float[]{0f, -2f})
                     );
 
-            style.addLayerAbove(lgedprjArea, ADMIN_BOUNDARY_FILL_LAYER);
+            style.addLayerAbove(fillLayer, ADMIN_BOUNDARY_FILL_LAYER);
             style.addLayerAbove(labelLayer, PROJECT_FILL_LAYER);
             style.addLayerAbove(symbolLayer, PROJECT_LABEL_LAYER);
 
@@ -390,7 +556,151 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
                 layer.setProperties(visibility(NONE));
             }
         } catch (Throwable throwable) {
-            Snackbar.make(this.getView(), "Couldn't add LGED to map - %s", Snackbar.LENGTH_LONG)
+            Snackbar.make(this.getView(), "Couldn't add LGED to map", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null)
+                    .show();
+        }
+    }
+
+    //layer position: 2
+    //ground water zone layer
+    private void addGroundWaterZoneLayerToMap(@NonNull Style style) {
+        try {
+            //URI uri = new URI(API.MAP_BASE_URL + "water_resources_wgs84/gwzone.json");
+            //GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, uri);
+
+            GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI("asset://water_resources_wgs84/lgedprj.json"));
+            style.addSource(source);
+
+            FillLayer fillLayer = new FillLayer(PROJECT_FILL_LAYER, PROJECT_LAYER);
+            fillLayer.setProperties(
+                    fillColor(Color.parseColor("#9ED9FC")),
+                    fillOpacity(0.8f)
+            );
+
+            SymbolLayer labelLayer = new SymbolLayer(PROJECT_LABEL_LAYER, PROJECT_LAYER)
+                    .withProperties(
+                            textField(get("GW_TABLE_M")),
+                            textSize(10f),
+                            textColor(Color.RED),
+                            textVariableAnchor(new String[]{TEXT_ANCHOR_TOP, TEXT_ANCHOR_BOTTOM, TEXT_ANCHOR_LEFT, TEXT_ANCHOR_RIGHT}),
+                            textJustify(TEXT_JUSTIFY_AUTO),
+                            textRadialOffset(0.5f));
+
+            SymbolLayer symbolLayer = new SymbolLayer(PROJECT_SYMBOL_LAYER, PROJECT_LAYER)
+                    .withProperties(
+                            PropertyFactory.iconImage(MAP_MARKER_ICON),
+                            iconAllowOverlap(false),
+                            iconIgnorePlacement(false),
+                            iconOffset(new Float[]{0f, -2f})
+                    );
+
+            style.addLayerAbove(fillLayer, ADMIN_BOUNDARY_FILL_LAYER);
+            style.addLayerAbove(labelLayer, PROJECT_FILL_LAYER);
+            style.addLayerAbove(symbolLayer, PROJECT_LABEL_LAYER);
+
+            Layer layer = style.getLayer(PROJECT_LABEL_LAYER);
+            if (layer != null) {
+                layer.setProperties(visibility(NONE));
+            }
+        } catch (Throwable throwable) {
+            Snackbar.make(this.getView(), "Couldn't add ground water zone to map", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null)
+                    .show();
+        }
+    }
+
+    //layer position: 2
+    //soil salinity area layer
+    private void addSoilSalinityAreaLayerToMap(@NonNull Style style) {
+        try {
+            //URI uri = new URI(API.MAP_BASE_URL + "water_resources_wgs84/soil_salanity_area.json");
+            //GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, uri);
+
+            GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI("asset://water_resources_wgs84/soil_salanity_area.json"));
+            style.addSource(source);
+
+            FillLayer fillLayer = new FillLayer(PROJECT_FILL_LAYER, PROJECT_LAYER);
+            fillLayer.setProperties(
+                    fillColor(Color.parseColor("#9A9657")),
+                    fillOpacity(0.8f)
+            );
+
+            SymbolLayer labelLayer = new SymbolLayer(PROJECT_LABEL_LAYER, PROJECT_LAYER)
+                    .withProperties(
+                            textField(get("TYPE")),
+                            textSize(10f),
+                            textColor(Color.RED),
+                            textVariableAnchor(new String[]{TEXT_ANCHOR_TOP, TEXT_ANCHOR_BOTTOM, TEXT_ANCHOR_LEFT, TEXT_ANCHOR_RIGHT}),
+                            textJustify(TEXT_JUSTIFY_AUTO),
+                            textRadialOffset(0.5f));
+
+            SymbolLayer symbolLayer = new SymbolLayer(PROJECT_SYMBOL_LAYER, PROJECT_LAYER)
+                    .withProperties(
+                            PropertyFactory.iconImage(MAP_MARKER_ICON),
+                            iconAllowOverlap(false),
+                            iconIgnorePlacement(false),
+                            iconOffset(new Float[]{0f, -2f})
+                    );
+
+            style.addLayerAbove(fillLayer, ADMIN_BOUNDARY_FILL_LAYER);
+            style.addLayerAbove(labelLayer, PROJECT_FILL_LAYER);
+            style.addLayerAbove(symbolLayer, PROJECT_LABEL_LAYER);
+
+            Layer layer = style.getLayer(PROJECT_LABEL_LAYER);
+            if (layer != null) {
+                layer.setProperties(visibility(NONE));
+            }
+        } catch (Throwable throwable) {
+            Snackbar.make(this.getView(), "Couldn't add salinity area to map", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null)
+                    .show();
+        }
+    }
+
+    //layer position: 2
+    //flood prone area layer
+    private void addFloodProneLayerToMap(@NonNull Style style) {
+        try {
+            //URI uri = new URI(API.MAP_BASE_URL + "water_resources_wgs84/flood_prone.json");
+            //GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, uri);
+
+            GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI("asset://water_resources_wgs84/flood_prone.json"));
+            style.addSource(source);
+
+            FillLayer fillLayer = new FillLayer(PROJECT_FILL_LAYER, PROJECT_LAYER);
+            fillLayer.setProperties(
+                    fillColor(Color.parseColor("#9A9657")),
+                    fillOpacity(0.8f)
+            );
+
+            SymbolLayer labelLayer = new SymbolLayer(PROJECT_LABEL_LAYER, PROJECT_LAYER)
+                    .withProperties(
+                            textField(get("TYPE")),
+                            textSize(10f),
+                            textColor(Color.RED),
+                            textVariableAnchor(new String[]{TEXT_ANCHOR_TOP, TEXT_ANCHOR_BOTTOM, TEXT_ANCHOR_LEFT, TEXT_ANCHOR_RIGHT}),
+                            textJustify(TEXT_JUSTIFY_AUTO),
+                            textRadialOffset(0.5f));
+
+            SymbolLayer symbolLayer = new SymbolLayer(PROJECT_SYMBOL_LAYER, PROJECT_LAYER)
+                    .withProperties(
+                            PropertyFactory.iconImage(MAP_MARKER_ICON),
+                            iconAllowOverlap(false),
+                            iconIgnorePlacement(false),
+                            iconOffset(new Float[]{0f, -2f})
+                    );
+
+            style.addLayerAbove(fillLayer, ADMIN_BOUNDARY_FILL_LAYER);
+            style.addLayerAbove(labelLayer, PROJECT_FILL_LAYER);
+            style.addLayerAbove(symbolLayer, PROJECT_LABEL_LAYER);
+
+            Layer layer = style.getLayer(PROJECT_LABEL_LAYER);
+            if (layer != null) {
+                layer.setProperties(visibility(NONE));
+            }
+        } catch (Throwable throwable) {
+            Snackbar.make(this.getView(), "Couldn't add salinity area to map", Snackbar.LENGTH_LONG)
                     .setAction("Action", null)
                     .show();
         }

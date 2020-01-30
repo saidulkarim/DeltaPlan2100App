@@ -61,6 +61,7 @@
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_marginTop="4dp"
+        android:layout_marginLeft="10dp"
         android:text="Item Icon"
         app:layout_constraintTop_toTopOf="@+id/guideline"
         app:srcCompat="@color/PapayaWhip"
