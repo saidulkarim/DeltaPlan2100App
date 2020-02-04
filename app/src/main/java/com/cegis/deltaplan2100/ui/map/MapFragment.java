@@ -6,7 +6,6 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +13,6 @@ import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -25,17 +23,13 @@ import androidx.lifecycle.ViewModelProviders;
 import com.cegis.deltaplan2100.API;
 import com.cegis.deltaplan2100.MainActivity;
 import com.cegis.deltaplan2100.R;
-import com.cegis.deltaplan2100.models.MacroEconIndicatorPivotData;
 import com.cegis.deltaplan2100.utility.GenerateHtmlContent;
-import com.cegis.deltaplan2100.utility.GetJsonResponse;
+import com.cegis.deltaplan2100.utility.HttpGetRequest;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
-import com.mapbox.geojson.GeoJson;
 import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
@@ -49,73 +43,35 @@ import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
-import com.mapbox.mapboxsdk.style.sources.GeoJsonOptions;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
-import com.mapbox.mapboxsdk.utils.*;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
-
-import okhttp3.Headers;
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-//import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
-import retrofit2.http.Url;
+import retrofit2.http.HTTP;
 
-import static com.github.mikephil.charting.charts.Chart.LOG_TAG;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.exponential;
+import static androidx.constraintlayout.widget.Constraints.TAG;
 import static com.mapbox.mapboxsdk.style.layers.Property.TEXT_ANCHOR_BOTTOM;
 import static com.mapbox.mapboxsdk.style.layers.Property.TEXT_ANCHOR_LEFT;
 import static com.mapbox.mapboxsdk.style.layers.Property.TEXT_ANCHOR_RIGHT;
 import static com.mapbox.mapboxsdk.style.layers.Property.TEXT_ANCHOR_TOP;
 import static com.mapbox.mapboxsdk.style.layers.Property.TEXT_JUSTIFY_AUTO;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.circleColor;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillColor;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.fillOpacity;
 
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAnchor;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconColor;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textJustify;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textRadialOffset;
@@ -124,25 +80,11 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.visibility;
 
 import static com.mapbox.mapboxsdk.style.layers.Property.NONE;
 import static com.mapbox.mapboxsdk.style.layers.Property.VISIBLE;
-import static java.nio.file.Paths.get;
-
-import static com.mapbox.mapboxsdk.style.expressions.Expression.division;
 import static com.mapbox.mapboxsdk.style.expressions.Expression.get;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.gte;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.has;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.literal;
-import static com.mapbox.mapboxsdk.style.expressions.Expression.lt;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconSize;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textAllowOverlap;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textColor;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textField;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textIgnorePlacement;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textOffset;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textSize;
-
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
-import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
 
 public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxMap.OnMapClickListener {
     private MapViewModel mViewModel;
@@ -169,6 +111,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
     private static final String MAP_MARKER_ICON = "map_marker_icon";
 
     private Typeface tf;
+    public FeatureCollection featureCollection;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -227,12 +170,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
         //endregion
-
-        try {
-            executeRequest();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         return root;
     }
@@ -352,99 +289,59 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
         return false;
     }
 
-    public void executeRequest() throws IOException {
-        String url = "http://202.53.173.179:9090/geoserver/BDP/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=BDP:LGEDProjectBoundary&maxFeatures=50&outputFormat=application/json";
-        //https://square.github.io/okhttp/recipes/
-
-        String res = GetJsonResponse.doGetRequest(url);
-        Snackbar.make(this.getView(), res.substring(0, 5), Snackbar.LENGTH_LONG)
-                .setAction("Action", null)
-                .show();
-//        try {
-//            Gson gson = new GsonBuilder()
-//                    .setLenient()
-//                    .create();
-//
-//            OkHttpClient okHttpClient = API.getUnsafeOkHttpClient();
-//            Retrofit retrofit = new Retrofit.Builder()
-//                    .baseUrl(url)
-//                    .client(okHttpClient)
-//                    .addConverterFactory(ScalarsConverterFactory.create())
-//                    .addConverterFactory(GsonConverterFactory.create(gson))
-//                    .build();
-//
-//            API api = retrofit.create(API.class);
-//            Call call = api.getLgedMapLayer();
-//
-//            call.enqueue(new Callback<String>() {
-//                @Override
-//                public void onResponse(Call<String> call, Response<String> response) {
-//                    if (response.isSuccessful()) {
-//                        try {
-//                            String res = response.body();
-//                            Log.i("Map API Call: ", res);
-//                        } catch (Exception e) {
-//                            e.printStackTrace();
-//                        }
-//                    } else {
-//                        Toast.makeText(getContext(), "Map Response not found.", Toast.LENGTH_LONG).show();
-//                    }
-//                }
-//
-//                @Override
-//                public void onFailure(Call<String> call, Throwable t) {
-//                    Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_LONG).show();
-//                }
-//            });
-//        } catch (Exception ex) {
-//            //Log.i("Map API Call Error: ", ex.getMessage());
-//        }
-    }
-
     //layer position: 1
     //base layer :: administrative boundary
     private void addAdminBoundaryLayerToMap(@NonNull Style style) {
         try {
-//            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-//            InputStream caInput = new BufferedInputStream(getResources().openRawResource(R.raw.dp2100_api_cert));
-//            Certificate ca;
-//
 //            try {
-//                ca = cf.generateCertificate(caInput);
-//                System.out.println("ca=" + ((X509Certificate) ca).getSubjectDN());
-//            } finally {
-//                caInput.close();
+//                //URI geoJsonUrl = new URI("https://url-to-geojson-file.geojson");
+//                URI geoJsonUrl = new URI("http://202.53.173.179:9090/geoserver/BDP/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=BDP:LGEDProjectBoundary&maxFeatures=50&outputFormat=application/json");
+//                GeoJsonSource geoJsonSource = new GeoJsonSource(ADMIN_BOUNDARY_LAYER, geoJsonUrl);
+//                style.addSource(geoJsonSource);
+//            } catch (URISyntaxException exception) {
+//                Log.d(TAG, exception.toString());
 //            }
-//
-//            // Create a KeyStore containing our trusted CAs
-//            String keyStoreType = KeyStore.getDefaultType();
-//            KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-//            keyStore.load(null, null);
-//            keyStore.setCertificateEntry("ca", ca);
-//
-//            // Create a TrustManager that trusts the CAs in our KeyStore
-//            String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
-//            TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
-//            tmf.init(keyStore);
-//
-//            // Create an SSLContext that uses our TrustManager
-//            SSLContext context = SSLContext.getInstance("TLS");
-//            context.init(null, tmf.getTrustManagers(), null);
-//
-//            // Tell the URLConnection to use a SocketFactory from our SSLContext
-//            URL url = new URL(API.MAP_BASE_URL + "admin/bgd.json");
-//
-//            HttpsURLConnection urlConnection =
-//                    (HttpsURLConnection) url.openConnection();
-//            urlConnection.setSSLSocketFactory(context.getSocketFactory());
-//
-//            InputStream in = urlConnection.getInputStream();
-//            //copyInputStreamToOutputStream(in, System.out);
 
-            //URL url = new URL(API.MAP_BASE_URL + "admin/bgd.json");
+            //OkHttpClient client = API.getUnsafeOkHttpClient();
+            //String url = "http://202.53.173.179:9090/geoserver/BDP/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=BDP:arsenic&maxFeatures=50&outputFormat=application/json";
+            //HttpGetRequest getRequest = new HttpGetRequest();
 
-            //URI uri = new URI(API.MAP_BASE_URL + "admin/bgd.json");
-            //GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, uri);
+//            try {
+//                result = getRequest.execute(url).get();
+//                Log.e(TAG, result);
+//
+//                featureCollection = FeatureCollection.fromJson(result);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+
+//            Request request = new Request.Builder()
+//                    .url(url)
+//                    .build();
+//
+//            client.newCall(request).enqueue(new Callback() {
+//                @Override
+//                public void onFailure(Call call, IOException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                @Override
+//                public void onResponse(Call call, Response response) throws IOException {
+//                    if (response.isSuccessful()) {
+//                        final String myResponse = response.body().string();
+//
+//                        getActivity().runOnUiThread(() -> {
+//                            GeoJsonSource source = new GeoJsonSource(ADMIN_BOUNDARY_LAYER, myResponse);
+//                            Log.e(TAG, myResponse.toString());
+//                            style.addSource(source);
+//                        });
+//                    }
+//                }
+//            });
+
+            //GeoJsonSource source = new GeoJsonSource(ADMIN_BOUNDARY_LAYER, getRequest.execute(url).get());
+            //Log.e(TAG, source.toString());
+            //style.addSource(source);
 
             GeoJsonSource source = new GeoJsonSource(ADMIN_BOUNDARY_LAYER, new URI("asset://admin/bgd.json"));
             style.addSource(source);
@@ -460,7 +357,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
                             fillColor(Color.parseColor("#F2F2F2")), fillOpacity(0.8f)
                     ));
         } catch (Throwable throwable) {
-            Snackbar.make(this.getView(), "Couldn't add admin boundary source to map", Snackbar.LENGTH_LONG)
+            Snackbar.make(this.getView(), "Could not add admin boundary source to map", Snackbar.LENGTH_LONG)
                     .setAction("Action", null)
                     .show();
         }
