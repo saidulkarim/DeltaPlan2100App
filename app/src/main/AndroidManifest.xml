@@ -23,15 +23,12 @@
             android:name=".About"
             android:label="@string/title_activity_about"
             android:theme="@style/AppTheme.NoActionBar"></activity>
-        <!-- <meta-data -->
-        <!-- android:name="com.google.android.geo.API_KEY" -->
-        <!-- android:value="@string/map_key" /> -->
-        <!-- <meta-data -->
-        <!-- android:name="com.google.android.gms.version" -->
-        <!-- android:value="@integer/google_play_services_version" /> -->
-        <meta-data
-            android:name="com.google.android.actions"
-            android:resource="@xml/network_security_config" />
+
+        <!--            need to remove this in development mode-->
+        <!--            on release mode you need to block this-->
+        <!--        <meta-data-->
+        <!--            android:name="com.google.android.actions"-->
+        <!--            android:resource="@xml/network_security_config" />-->
 
         <activity android:name=".MessageActivity">
             <intent-filter>

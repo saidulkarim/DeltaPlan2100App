@@ -603,6 +603,51 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
         }
     }
 
+    //layer position: 2
+    //flood prone area layer
+    private void addInvestmentProjectsLayerToMap(@NonNull Style style) {
+        try {
+            GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI("asset://investment_project/investment_projects.json"));
+            style.addSource(source);
+
+            FillLayer fillLayer = new FillLayer(PROJECT_FILL_LAYER, PROJECT_LAYER);
+            fillLayer.setProperties(
+                    fillColor(Color.parseColor("#FDE4FD")),
+                    fillOpacity(0.8f)
+            );
+
+            SymbolLayer labelLayer = new SymbolLayer(PROJECT_LABEL_LAYER, PROJECT_LAYER)
+                    .withProperties(
+                            textField(get("OBJECTID_1")),
+                            textSize(10f),
+                            textColor(Color.RED),
+                            textVariableAnchor(new String[]{TEXT_ANCHOR_TOP, TEXT_ANCHOR_BOTTOM, TEXT_ANCHOR_LEFT, TEXT_ANCHOR_RIGHT}),
+                            textJustify(TEXT_JUSTIFY_AUTO),
+                            textRadialOffset(0.5f));
+
+            SymbolLayer symbolLayer = new SymbolLayer(PROJECT_SYMBOL_LAYER, PROJECT_LAYER)
+                    .withProperties(
+                            PropertyFactory.iconImage(MAP_MARKER_ICON),
+                            iconAllowOverlap(false),
+                            iconIgnorePlacement(false),
+                            iconOffset(new Float[]{0f, -2f})
+                    );
+
+            style.addLayerAbove(fillLayer, ADMIN_BOUNDARY_FILL_LAYER);
+            style.addLayerAbove(labelLayer, PROJECT_FILL_LAYER);
+            style.addLayerAbove(symbolLayer, PROJECT_LABEL_LAYER);
+
+            Layer layer = style.getLayer(PROJECT_LABEL_LAYER);
+            if (layer != null) {
+                layer.setProperties(visibility(NONE));
+            }
+        } catch (Throwable throwable) {
+            Snackbar.make(this.getView(), "Couldn't add salinity area to map", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null)
+                    .show();
+        }
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -641,6 +686,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
             mapboxMap.removeOnMapClickListener(MapFragment.this::onMapClick);
         }
 
+        mapView.onDestroy();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
         mapView.onDestroy();
     }
 

@@ -7,16 +7,22 @@ android {
         applicationId "com.cegis.deltaplan2100"
         minSdkVersion 15
         targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName '2.0.1'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
-        release {
+        debug {
+            testCoverageEnabled = true
             minifyEnabled false
+        }
+        release {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            testCoverageEnabled = false
+            minifyEnabled false
         }
     }
+
     // *** added by rony ***
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -49,13 +55,6 @@ dependencies {
     //map box
     implementation 'com.mapbox.mapboxsdk:mapbox-android-sdk:8.6.0'
 
-//    //google map
-//    implementation "com.google.android.gms:play-services-maps:$googlePlayVersion"
-//    implementation "com.google.android.gms:play-services-location:$googlePlayVersion"
-//
-//    //google map utility
-//    implementation 'com.google.maps.android:android-maps-utils:0.5'
-
     // timber
     implementation 'com.jakewharton.timber:timber:4.7.1'
     implementation 'com.android.support:cardview-v7:29.0.2'
@@ -78,7 +77,4 @@ dependencies {
 
     //linq
     implementation 'br.com.zbra:android-linq:1.1.0'
-
-    //volley
-    //implementation 'com.android.volley:volley:1.1.1'
 }

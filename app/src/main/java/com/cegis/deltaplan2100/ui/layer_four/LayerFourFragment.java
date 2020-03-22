@@ -14,6 +14,7 @@ import androidx.fragment.app.Fragment;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -170,6 +171,18 @@ public class LayerFourFragment extends Fragment {
         //endregion
 
         //region action type activity
+        spnrMacroEconIndicator.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                //code
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                //code
+            }
+        });
+
         if (itemParentLevel == 2) {
             //Toast.makeText(this.getContext(), "Item Parent Level 2", Toast.LENGTH_SHORT).show();
         } else if (itemParentLevel == 3) {

@@ -22,7 +22,6 @@
         mapbox:mapbox_cameraTargetLng="90.4112203"
         mapbox:mapbox_cameraZoom="6"
         mapbox:mapbox_uiRotateGestures="false" />
-    <!--mapbox:mapbox_uiRotateGestures="false"-->
 
     <!--    &lt;!&ndash;administrative boundary layer&ndash;&gt;-->
     <!--    <com.google.android.material.floatingactionbutton.FloatingActionButton-->
