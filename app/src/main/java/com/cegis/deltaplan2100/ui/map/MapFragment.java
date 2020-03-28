@@ -11,8 +11,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -23,10 +27,14 @@ import androidx.lifecycle.ViewModelProviders;
 import com.cegis.deltaplan2100.API;
 import com.cegis.deltaplan2100.MainActivity;
 import com.cegis.deltaplan2100.R;
+import com.cegis.deltaplan2100.models.InvestmentProjectList;
+import com.cegis.deltaplan2100.models.MacroEconIndicatorsList;
 import com.cegis.deltaplan2100.utility.GenerateHtmlContent;
 import com.cegis.deltaplan2100.utility.HttpGetRequest;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.FeatureCollection;
@@ -41,6 +49,7 @@ import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.style.layers.FillLayer;
 import com.mapbox.mapboxsdk.style.layers.Layer;
 import com.mapbox.mapboxsdk.style.layers.LineLayer;
+import com.mapbox.mapboxsdk.style.layers.Property;
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
@@ -55,13 +64,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.Response;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 import retrofit2.http.HTTP;
 
+import static android.R.layout.simple_spinner_item;
 import static androidx.constraintlayout.widget.Constraints.TAG;
 import static com.mapbox.mapboxsdk.style.layers.Property.TEXT_ANCHOR_BOTTOM;
 import static com.mapbox.mapboxsdk.style.layers.Property.TEXT_ANCHOR_LEFT;
@@ -91,7 +104,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
     private View root;
     private MapView mapView;
     private MapboxMap mapboxMap;
-    private FloatingActionButton fab, fab0, fab1, fab2, fab3, fab4;
+    private FloatingActionButton fab, fab0, fab1, fab2, fab3, fab4, fabDetails;
+    private Spinner spnrInvestProjList;
 
     private int itemID, itemParentLevel;
     private String groupHeader, itemContentAs;
@@ -108,10 +122,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
     private static final String PROJECT_LABEL_LAYER = "projectLabelLayer";
     private static final String PROJECT_SYMBOL_LAYER = "projectSymbolLayer";
 
+    private static final String INV_PROJECT_LAYER = "INV_PROJECT_LAYER";
+    private static final String INV_PROJ_FILL_LAYER = "INV_PROJ_FILL_LAYER";
+    private static final String INV_PROJ_LINE_LAYER = "INV_PROJ_LINE_LAYER";
+
     private static final String MAP_MARKER_ICON = "map_marker_icon";
 
     private Typeface tf;
     public FeatureCollection featureCollection;
+
+    private ArrayList<InvestmentProjectList> lstInvestmentProjectList;
+    private ArrayList<String> list = new ArrayList<String>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -131,10 +152,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
         itemContentAs = getArguments().getString("ItemContentAs");
         itemParentLevel = getArguments().getInt("ItemParentLevel");
         //endregion receiving
-
-        //region loading data
-        ((MainActivity) getActivity()).setToolBar(groupHeader);
-        //endregion
 
         //region control
         fab = root.findViewById(R.id.fab);
@@ -169,6 +186,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
         mapView = root.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
+
+        spnrInvestProjList = root.findViewById(R.id.spnrInvestProjList);
+        fabDetails = root.findViewById(R.id.fabDetails);
+        //endregion
+
+        //region loading data
+        ((MainActivity) getActivity()).setToolBar(groupHeader);
+
+        if (groupHeader.toLowerCase().contains("investment projects")) {
+            fabDetails.show();
+            spnrInvestProjList.setVisibility(View.VISIBLE);
+            loadInvestmentProjectData(spnrInvestProjList);
+            fabDetails.setOnClickListener(view -> fabDetailsClick());
+        }
         //endregion
 
         return root;
@@ -181,6 +212,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
         mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
             mapboxMap.addOnMapClickListener(MapFragment.this::onMapClick);
             addAdminBoundaryLayerToMap(style);
+            //addInvestmentProjectsLayerToMap(style);
 
             if (style != null) {
                 mapboxMap.getStyle().addImage(
@@ -204,6 +236,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
                     addGroundWaterZoneLayerToMap(style);
                 } else if (groupHeader.toLowerCase().contains("salinity area")) {
                     addSoilSalinityAreaLayerToMap(style);
+                } else if (groupHeader.toLowerCase().contains("investment projects")) {
+                    addInvestmentProjectsLayerToMap(style);
                 }
             }
         });
@@ -256,6 +290,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
                             prjName = feature.properties().get("GW_TABLE_M").toString().replaceAll(regex, "");
                         } else if (groupHeader.toLowerCase().contains("salinity area")) {
                             prjName = feature.properties().get("TYPE").toString().replaceAll(regex, "");
+                        } else if (groupHeader.toLowerCase().contains("investment projects")) {
+                            prjName = feature.properties().get("Name").toString().replaceAll(regex, "");
                         }
 
                         tv.setText(prjName);
@@ -345,16 +381,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
 
             GeoJsonSource source = new GeoJsonSource(ADMIN_BOUNDARY_LAYER, new URI("asset://admin/bgd.json"));
             style.addSource(source);
+            
+            style.addLayer(new FillLayer(ADMIN_BOUNDARY_FILL_LAYER, ADMIN_BOUNDARY_LAYER)
+                    .withProperties(
+                            fillColor(Color.parseColor("#F2F2F2")), fillOpacity(0.8f)
+                    ));
 
             style.addLayer(new LineLayer(ADMIN_BOUNDARY_LINE_LAYER, ADMIN_BOUNDARY_LAYER)
                     .withProperties(
                             PropertyFactory.lineWidth(1f),
                             PropertyFactory.lineColor(Color.parseColor("#165F8B"))
-                    ));
-
-            style.addLayer(new FillLayer(ADMIN_BOUNDARY_FILL_LAYER, ADMIN_BOUNDARY_LAYER)
-                    .withProperties(
-                            fillColor(Color.parseColor("#F2F2F2")), fillOpacity(0.8f)
                     ));
         } catch (Throwable throwable) {
             Snackbar.make(this.getView(), "Could not add admin boundary source to map", Snackbar.LENGTH_LONG)
@@ -607,18 +643,18 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
     //flood prone area layer
     private void addInvestmentProjectsLayerToMap(@NonNull Style style) {
         try {
-            GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI("asset://investment_project/investment_projects.json"));
+            GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI("asset://investment_project/2.json"));
             style.addSource(source);
 
             FillLayer fillLayer = new FillLayer(PROJECT_FILL_LAYER, PROJECT_LAYER);
             fillLayer.setProperties(
-                    fillColor(Color.parseColor("#FDE4FD")),
+                    fillColor(Color.parseColor("#C812C8")),
                     fillOpacity(0.8f)
             );
 
             SymbolLayer labelLayer = new SymbolLayer(PROJECT_LABEL_LAYER, PROJECT_LAYER)
                     .withProperties(
-                            textField(get("OBJECTID_1")),
+                            textField(get("name")),
                             textSize(10f),
                             textColor(Color.RED),
                             textVariableAnchor(new String[]{TEXT_ANCHOR_TOP, TEXT_ANCHOR_BOTTOM, TEXT_ANCHOR_LEFT, TEXT_ANCHOR_RIGHT}),
@@ -637,15 +673,223 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
             style.addLayerAbove(labelLayer, PROJECT_FILL_LAYER);
             style.addLayerAbove(symbolLayer, PROJECT_LABEL_LAYER);
 
-            Layer layer = style.getLayer(PROJECT_LABEL_LAYER);
-            if (layer != null) {
-                layer.setProperties(visibility(NONE));
-            }
+            //            Layer layer = style.getLayer(PROJECT_LABEL_LAYER);
+            //            if (layer != null) {
+            //                layer.setProperties(visibility(NONE));
+            //            }
+
+            Toast.makeText(getContext(), "Yes, INV_PROJECT_LAYER base layer added.", Toast.LENGTH_LONG).show();
         } catch (Throwable throwable) {
-            Snackbar.make(this.getView(), "Couldn't add salinity area to map", Snackbar.LENGTH_LONG)
+            Snackbar.make(this.getView(), "Couldn't add base investment project to map", Snackbar.LENGTH_LONG)
                     .setAction("Action", null)
                     .show();
         }
+    }
+
+    //call level: 3
+    //layer position: 3
+    //Selected Investment Project Layer
+    private void addSelectedInvProjLayerToMap(String data) {
+        mapboxMap.getStyle(style -> {
+            try {
+                GeoJsonSource source = new GeoJsonSource(INV_PROJECT_LAYER, new URI("asset://water_resources_wgs84/bwdbprj.json"));
+                style.addSource(source);
+
+                FillLayer fillLayer = new FillLayer(INV_PROJ_FILL_LAYER, INV_PROJECT_LAYER);
+                fillLayer.setProperties(
+                        fillColor(Color.parseColor("#B01BB0")),
+                        fillOpacity(0.8f)
+                );
+
+                LineLayer lineLayer = new LineLayer(INV_PROJ_LINE_LAYER, INV_PROJECT_LAYER);
+                lineLayer.withProperties(
+                        PropertyFactory.lineWidth(1f),
+                        PropertyFactory.lineColor(Color.parseColor("#D12215"))
+                );
+
+//                SymbolLayer labelLayer = new SymbolLayer(PROJECT_LABEL_LAYER, PROJECT_LAYER)
+//                        .withProperties(
+//                                textField(get("Name")),
+//                                textSize(10f),
+//                                textColor(Color.RED),
+//                                textVariableAnchor(new String[]{TEXT_ANCHOR_TOP, TEXT_ANCHOR_BOTTOM, TEXT_ANCHOR_LEFT, TEXT_ANCHOR_RIGHT}),
+//                                textJustify(TEXT_JUSTIFY_AUTO),
+//                                textRadialOffset(0.5f));
+//
+//                SymbolLayer symbolLayer = new SymbolLayer(PROJECT_SYMBOL_LAYER, PROJECT_LAYER)
+//                        .withProperties(
+//                                PropertyFactory.iconImage(MAP_MARKER_ICON),
+//                                iconAllowOverlap(false),
+//                                iconIgnorePlacement(false),
+//                                iconOffset(new Float[]{0f, -2f})
+//                        );
+
+                style.addLayerAbove(fillLayer, INV_PROJECT_LAYER);
+                //style.addLayerAbove(labelLayer, PROJECT_FILL_LAYER);
+                //style.addLayerAbove(symbolLayer, PROJECT_LABEL_LAYER);
+
+                //addBwdbProjLayerToMap(style);
+
+//                GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, data);
+//                style.addSource(source);
+//
+//                style.addLayer(new LineLayer(INV_PROJ_LINE_LAYER, PROJECT_LAYER)
+//                        .withProperties(
+//                                PropertyFactory.lineWidth(1f),
+//                                PropertyFactory.lineColor(Color.parseColor("#EE1707"))
+//                        ));
+
+//                style.addLayer(new FillLayer(INV_PROJ_FILL_LAYER, PROJECT_LAYER)
+//                        .withProperties(
+//                                fillColor(Color.parseColor("#F2BEF2")), fillOpacity(0.8f)
+//                        ));
+
+                Toast.makeText(getContext(), "addSelectedInvProjLayerToMap event has been called!", Toast.LENGTH_LONG).show();
+            } catch (Throwable throwable) {
+                Snackbar.make(this.getView(), "Couldn't add this investment project layer to map. " + throwable.getMessage(), Snackbar.LENGTH_LONG)
+                        .setAction("Action", null)
+                        .show();
+            }
+        });
+    }
+
+    //call level: 1
+    //spinner loading
+    //investment project
+    private void loadInvestmentProjectData(Spinner spinner) {
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .create();
+        OkHttpClient okHttpClient = API.getUnsafeOkHttpClient();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(API.BASE_URL)
+                .client(okHttpClient)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+
+        API api = retrofit.create(API.class);
+        retrofit2.Call call = api.getInvestmentProjectList();
+
+        call.enqueue(new Callback<List<InvestmentProjectList>>() {
+            @Override
+            public void onResponse(retrofit2.Call<List<InvestmentProjectList>> call, Response<List<InvestmentProjectList>> response) {
+                if (response.isSuccessful()) {
+                    try {
+                        List<InvestmentProjectList> responseList = response.body();
+                        list = new ArrayList<>();
+
+                        if (responseList.size() > 0) {
+                            lstInvestmentProjectList = new ArrayList<>();
+
+                            for (int i = 0; i < responseList.size(); i++) {
+                                InvestmentProjectList spinnerModel = new InvestmentProjectList();
+                                spinnerModel.setCode(responseList.get(i).getCode());
+                                spinnerModel.setName(responseList.get(i).getName());
+                                lstInvestmentProjectList.add(spinnerModel);
+
+                                list.add(responseList.get(i).getName());
+                            }
+
+                            spinner.setAdapter(null);
+                            ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(getContext(), simple_spinner_item, list);
+                            spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                            spinner.setAdapter(spinnerArrayAdapter);
+
+                            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                @Override
+                                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                    String item = (String) parent.getItemAtPosition(position);
+                                    String code = lstInvestmentProjectList.get(position).getCode();
+                                    //((TextView) parent.getChildAt(0)).setTextColor(Color.parseColor("#2F4F4F"));
+
+                                    //Toast.makeText(getContext(), "Code: " + code, Toast.LENGTH_LONG).show();
+                                    //getSelectedInvProjLayer(code);
+                                    ////getSelectedInvProjLayer("DP15-3"); //rony
+                                }
+
+                                @Override
+                                public void onNothingSelected(AdapterView<?> parent) {
+
+                                }
+                            });
+                        } else {
+                            list = new ArrayList<>();
+                            lstInvestmentProjectList = new ArrayList<>();
+
+                            Toast.makeText(getContext(), "Sorry, no data found!", Toast.LENGTH_LONG).show();
+                        }
+                    } catch (Exception e) {
+                        list = new ArrayList<>();
+                        lstInvestmentProjectList = new ArrayList<>();
+
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<InvestmentProjectList>> call, Throwable t) {
+                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    //call level: 2
+    private void getSelectedInvProjLayer(String code) {
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .create();
+        OkHttpClient okHttpClient = API.getUnsafeOkHttpClient();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(API.BASE_URL)
+                .client(okHttpClient)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+
+        API api = retrofit.create(API.class);
+        retrofit2.Call call = api.getInvestmentProjectLayer(code);
+
+        call.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(retrofit2.Call<String> call, Response<String> response) {
+                if (response.isSuccessful()) {
+                    try {
+                        String data = response.body();
+
+                        if (!data.isEmpty()) {
+                            //Toast.makeText(getContext(), "Data length: " + data.length(), Toast.LENGTH_LONG).show();
+
+                            //addSelectedInvProjLayerToMap(data);
+                        } else {
+                            Toast.makeText(getContext(), "Sorry, no data found!", Toast.LENGTH_LONG).show();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void fabDetailsClick() {
+        mapboxMap.getStyle(style -> {
+            Layer layer = style.getLayer(INV_PROJECT_LAYER);
+
+            if (layer != null) {
+                String ip = spnrInvestProjList.getSelectedItem().toString();
+                String ipCode = lstInvestmentProjectList.get(spnrInvestProjList.getSelectedItemPosition()).getCode();
+                Toast.makeText(getContext(), "Yes, has layer. Name: " + ip + " - Code: " + ipCode, Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(getContext(), "Yes, INV_PROJECT_LAYER layer not added.", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override

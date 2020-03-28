@@ -184,7 +184,7 @@ public class LayerFourFragment extends Fragment {
         });
 
         if (itemParentLevel == 2) {
-            //Toast.makeText(this.getContext(), "Item Parent Level 2", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this.getContext(), "Item Parent Level 2", Toast.LENGTH_SHORT).show();
         } else if (itemParentLevel == 3) {
             if (itemContentAs.toLowerCase().contains("text") ||
                     itemContentAs.toLowerCase().contains("table") ||

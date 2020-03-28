@@ -1,5 +1,6 @@
 package com.cegis.deltaplan2100;
 
+import com.cegis.deltaplan2100.models.InvestmentProjectList;
 import com.cegis.deltaplan2100.models.MacroEconIndicatorPivotData;
 import com.cegis.deltaplan2100.models.MacroEconIndicatorsList;
 import com.cegis.deltaplan2100.models.ModelComponentLevelOne;
@@ -126,6 +127,12 @@ public interface API {
     @Headers("Content-Type: application/json")
     @GET("Map/GetLgedMapLayer")
     Call<String> getLgedMapLayer();
+
+    @GET("Content/InvestmentProjectList")
+    Call<List<InvestmentProjectList>> getInvestmentProjectList();
+
+    @GET("Content/InvestmentProjectLayer/{code}")
+    Call<String> getInvestmentProjectLayer(@Path("code") String code);
 }
 
 

@@ -39,5 +39,4 @@ public class MacroEconIndicatorsList {
     public void setVisualOrder(Integer visualOrder) {
         this.visualOrder = visualOrder;
     }
-
 }

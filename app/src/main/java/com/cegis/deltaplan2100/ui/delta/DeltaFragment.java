@@ -22,7 +22,9 @@ import com.cegis.deltaplan2100.MainActivity;
 import com.cegis.deltaplan2100.R;
 import com.cegis.deltaplan2100.models.ListViewItems;
 import com.cegis.deltaplan2100.models.ModelComponentLevelTwo;
+import com.cegis.deltaplan2100.ui.layer_four.LayerFourFragment;
 import com.cegis.deltaplan2100.ui.layer_three.LayerThreeFragment;
+import com.cegis.deltaplan2100.ui.map.MapFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -114,7 +116,13 @@ public class DeltaFragment extends Fragment {
                         String itemName = lstViewItems.get(position).getItemName();
                         String itemContentAs = lstViewItems.get(position).getItemIcon();
 
-                        fragment = new LayerThreeFragment();
+                        if (itemContentAs.toLowerCase().contains("map")) {
+                            fragment = new MapFragment();
+                        } else {
+                            fragment = new LayerThreeFragment();
+                        }
+
+                        //fragment = new LayerThreeFragment();
                         args = new Bundle();
                         args.putInt("ItemID", itemID);
                         args.putString("GroupHeader", itemName);
