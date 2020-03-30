@@ -53,6 +53,7 @@ import com.mapbox.mapboxsdk.style.layers.Property;
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
+import com.mapbox.mapboxsdk.style.sources.Source;
 
 import org.json.JSONObject;
 
@@ -125,6 +126,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
     private static final String INV_PROJECT_LAYER = "INV_PROJECT_LAYER";
     private static final String INV_PROJ_FILL_LAYER = "INV_PROJ_FILL_LAYER";
     private static final String INV_PROJ_LINE_LAYER = "INV_PROJ_LINE_LAYER";
+    private static final String INV_PROJ_LABEL_LAYER = "invProjectLabelLayer";
+    private static final String INV_PROJ_SYMBOL_LAYER = "invProjectSymbolLayer";
 
     private static final String MAP_MARKER_ICON = "map_marker_icon";
 
@@ -212,7 +215,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
         mapboxMap.setStyle(Style.MAPBOX_STREETS, style -> {
             mapboxMap.addOnMapClickListener(MapFragment.this::onMapClick);
             addAdminBoundaryLayerToMap(style);
-            //addInvestmentProjectsLayerToMap(style);
 
             if (style != null) {
                 mapboxMap.getStyle().addImage(
@@ -237,7 +239,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
                 } else if (groupHeader.toLowerCase().contains("salinity area")) {
                     addSoilSalinityAreaLayerToMap(style);
                 } else if (groupHeader.toLowerCase().contains("investment projects")) {
-                    addInvestmentProjectsLayerToMap(style);
+                    //addInvestmentProjectsLayerToMap(style);
                 }
             }
         });
@@ -291,7 +293,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
                         } else if (groupHeader.toLowerCase().contains("salinity area")) {
                             prjName = feature.properties().get("TYPE").toString().replaceAll(regex, "");
                         } else if (groupHeader.toLowerCase().contains("investment projects")) {
-                            prjName = feature.properties().get("Name").toString().replaceAll(regex, "");
+                            prjName = feature.properties().get("name").toString().replaceAll(regex, "");
                         }
 
                         tv.setText(prjName);
@@ -381,7 +383,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
 
             GeoJsonSource source = new GeoJsonSource(ADMIN_BOUNDARY_LAYER, new URI("asset://admin/bgd.json"));
             style.addSource(source);
-            
+
             style.addLayer(new FillLayer(ADMIN_BOUNDARY_FILL_LAYER, ADMIN_BOUNDARY_LAYER)
                     .withProperties(
                             fillColor(Color.parseColor("#F2F2F2")), fillOpacity(0.8f)
@@ -643,7 +645,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
     //flood prone area layer
     private void addInvestmentProjectsLayerToMap(@NonNull Style style) {
         try {
-            GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI("asset://investment_project/2.json"));
+            GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI("asset://investment_project/1.json"));
             style.addSource(source);
 
             FillLayer fillLayer = new FillLayer(PROJECT_FILL_LAYER, PROJECT_LAYER);
@@ -691,60 +693,58 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
     //Selected Investment Project Layer
     private void addSelectedInvProjLayerToMap(String data) {
         mapboxMap.getStyle(style -> {
+            Source oldSource = style.getSource(INV_PROJECT_LAYER);
+
+            if (oldSource != null) {
+                String id = oldSource.getId();
+
+                style.removeLayer(INV_PROJ_LABEL_LAYER);
+                style.removeLayer(INV_PROJ_SYMBOL_LAYER);
+                style.removeLayer(PROJECT_FILL_LAYER);
+                style.removeLayer(INV_PROJ_LINE_LAYER);
+                style.removeLayer(INV_PROJECT_LAYER);
+                style.removeSource(id);
+            }
+        });
+
+        mapboxMap.getStyle(style -> {
             try {
-                GeoJsonSource source = new GeoJsonSource(INV_PROJECT_LAYER, new URI("asset://water_resources_wgs84/bwdbprj.json"));
+                GeoJsonSource source = new GeoJsonSource(INV_PROJECT_LAYER, data);
                 style.addSource(source);
 
-                FillLayer fillLayer = new FillLayer(INV_PROJ_FILL_LAYER, INV_PROJECT_LAYER);
+                FillLayer fillLayer = new FillLayer(PROJECT_FILL_LAYER, INV_PROJECT_LAYER);
                 fillLayer.setProperties(
-                        fillColor(Color.parseColor("#B01BB0")),
-                        fillOpacity(0.8f)
+                        fillColor(Color.parseColor("#27A6E1")),
+                        fillOpacity(0.6f)
                 );
 
                 LineLayer lineLayer = new LineLayer(INV_PROJ_LINE_LAYER, INV_PROJECT_LAYER);
                 lineLayer.withProperties(
                         PropertyFactory.lineWidth(1f),
-                        PropertyFactory.lineColor(Color.parseColor("#D12215"))
+                        PropertyFactory.lineColor(Color.parseColor("#2A5F78"))
                 );
 
-//                SymbolLayer labelLayer = new SymbolLayer(PROJECT_LABEL_LAYER, PROJECT_LAYER)
-//                        .withProperties(
-//                                textField(get("Name")),
-//                                textSize(10f),
-//                                textColor(Color.RED),
-//                                textVariableAnchor(new String[]{TEXT_ANCHOR_TOP, TEXT_ANCHOR_BOTTOM, TEXT_ANCHOR_LEFT, TEXT_ANCHOR_RIGHT}),
-//                                textJustify(TEXT_JUSTIFY_AUTO),
-//                                textRadialOffset(0.5f));
-//
-//                SymbolLayer symbolLayer = new SymbolLayer(PROJECT_SYMBOL_LAYER, PROJECT_LAYER)
-//                        .withProperties(
-//                                PropertyFactory.iconImage(MAP_MARKER_ICON),
-//                                iconAllowOverlap(false),
-//                                iconIgnorePlacement(false),
-//                                iconOffset(new Float[]{0f, -2f})
-//                        );
+                SymbolLayer labelLayer = new SymbolLayer(INV_PROJ_LABEL_LAYER, INV_PROJECT_LAYER)
+                        .withProperties(
+                                textField(get("name")),
+                                textSize(10f),
+                                textColor(Color.parseColor("#0A445F")),
+                                textVariableAnchor(new String[]{TEXT_ANCHOR_TOP, TEXT_ANCHOR_BOTTOM, TEXT_ANCHOR_LEFT, TEXT_ANCHOR_RIGHT}),
+                                textJustify(TEXT_JUSTIFY_AUTO),
+                                textRadialOffset(0.5f));
 
-                style.addLayerAbove(fillLayer, INV_PROJECT_LAYER);
-                //style.addLayerAbove(labelLayer, PROJECT_FILL_LAYER);
-                //style.addLayerAbove(symbolLayer, PROJECT_LABEL_LAYER);
+                SymbolLayer symbolLayer = new SymbolLayer(INV_PROJ_SYMBOL_LAYER, INV_PROJECT_LAYER)
+                        .withProperties(
+                                PropertyFactory.iconImage(MAP_MARKER_ICON),
+                                iconAllowOverlap(false),
+                                iconIgnorePlacement(false),
+                                iconOffset(new Float[]{0f, -2f})
+                        );
 
-                //addBwdbProjLayerToMap(style);
-
-//                GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, data);
-//                style.addSource(source);
-//
-//                style.addLayer(new LineLayer(INV_PROJ_LINE_LAYER, PROJECT_LAYER)
-//                        .withProperties(
-//                                PropertyFactory.lineWidth(1f),
-//                                PropertyFactory.lineColor(Color.parseColor("#EE1707"))
-//                        ));
-
-//                style.addLayer(new FillLayer(INV_PROJ_FILL_LAYER, PROJECT_LAYER)
-//                        .withProperties(
-//                                fillColor(Color.parseColor("#F2BEF2")), fillOpacity(0.8f)
-//                        ));
-
-                Toast.makeText(getContext(), "addSelectedInvProjLayerToMap event has been called!", Toast.LENGTH_LONG).show();
+                style.addLayerAbove(fillLayer, ADMIN_BOUNDARY_FILL_LAYER);
+                style.addLayerAbove(lineLayer, PROJECT_FILL_LAYER);
+                style.addLayerAbove(labelLayer, PROJECT_FILL_LAYER);
+                style.addLayerAbove(symbolLayer, PROJECT_FILL_LAYER);
             } catch (Throwable throwable) {
                 Snackbar.make(this.getView(), "Couldn't add this investment project layer to map. " + throwable.getMessage(), Snackbar.LENGTH_LONG)
                         .setAction("Action", null)
@@ -804,8 +804,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
                                     //((TextView) parent.getChildAt(0)).setTextColor(Color.parseColor("#2F4F4F"));
 
                                     //Toast.makeText(getContext(), "Code: " + code, Toast.LENGTH_LONG).show();
-                                    //getSelectedInvProjLayer(code);
-                                    ////getSelectedInvProjLayer("DP15-3"); //rony
+
+                                    //if (code.equals("MR1-6"))
+                                    getSelectedInvProjLayer(code);
                                 }
 
                                 @Override
@@ -861,7 +862,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
                         if (!data.isEmpty()) {
                             //Toast.makeText(getContext(), "Data length: " + data.length(), Toast.LENGTH_LONG).show();
 
-                            //addSelectedInvProjLayerToMap(data);
+                            addSelectedInvProjLayerToMap(data);
                         } else {
                             Toast.makeText(getContext(), "Sorry, no data found!", Toast.LENGTH_LONG).show();
                         }
@@ -946,6 +947,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
     }
 
     private void menuBaseLayer() {
+        //mapboxMap.removeLayer(mapboxMap.getLayers().get(i));
         mapboxMap.getStyle(style -> {
             Layer layer = style.getLayer(ADMIN_BOUNDARY_FILL_LAYER);
 
