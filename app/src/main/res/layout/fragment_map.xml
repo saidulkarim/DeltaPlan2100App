@@ -122,9 +122,8 @@
         android:background="#66F0F0F0"
         android:clickable="true"
         android:scaleType="fitXY"
-        android:src="@drawable/ic_fullscreen_24"
-        android:tint="@color/White"
-        android:visibility="gone" />
+        android:src="@drawable/ic_my_location"
+        android:tint="@color/White" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"
@@ -133,7 +132,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end|bottom"
         android:layout_margin="16dp"
-
         android:scaleType="fitXY"
         android:src="@drawable/ic_menu_24"
         android:tint="@color/White" />

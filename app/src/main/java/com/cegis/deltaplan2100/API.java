@@ -133,6 +133,9 @@ public interface API {
 
     @GET("Content/InvestmentProjectLayer/{code}")
     Call<String> getInvestmentProjectLayer(@Path("code") String code);
+
+    @GET("Content/BwdbProjectLayer")
+    Call<String> getBwdbProjectLayer();
 }
 
 
