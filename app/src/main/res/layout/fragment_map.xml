@@ -142,13 +142,25 @@
         style="@style/Widget.Design.FloatingActionButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|left"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="70dp"
-        android:backgroundTint="@color/DarkCyan"
+        android:layout_gravity="bottom|left"
+        android:layout_margin="16dp"
+        android:backgroundTint="@color/OrangeYellow"
         android:scaleType="fitXY"
-        android:src="@drawable/ic_details"
+        android:src="@drawable/ic_map_legend"
         android:tint="@color/White"
+        android:visibility="invisible" />
+
+    <Spinner
+        android:id="@+id/spnrHotspotList"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/spinner_border"
+        android:gravity="left|center"
+        android:spinnerMode="dropdown"
+        android:tooltipText="Hotspot List"
         android:visibility="invisible" />
 
     <Spinner
@@ -156,7 +168,7 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_marginLeft="10dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="65dp"
         android:layout_marginRight="10dp"
         android:background="@drawable/spinner_border"
         android:gravity="left|center"

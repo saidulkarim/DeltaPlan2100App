@@ -128,8 +128,11 @@ public interface API {
     @GET("Map/GetLgedMapLayer")
     Call<String> getLgedMapLayer();
 
-    @GET("Content/InvestmentProjectList")
-    Call<List<InvestmentProjectList>> getInvestmentProjectList();
+    @GET("Content/InvestmentProjectHotspotList")
+    Call<List<InvestmentProjectList>> getInvestmentProjectHotspotList();
+
+    @GET("Content/InvestmentProjectList/{hotspot}")
+    Call<List<InvestmentProjectList>> getInvestmentProjectList(@Path("hotspot") String hotspot);
 
     @GET("Content/InvestmentProjectLayer/{code}")
     Call<String> getInvestmentProjectLayer(@Path("code") String code);
