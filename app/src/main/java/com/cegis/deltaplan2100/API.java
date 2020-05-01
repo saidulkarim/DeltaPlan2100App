@@ -1,5 +1,7 @@
 package com.cegis.deltaplan2100;
 
+import com.cegis.deltaplan2100.models.ClimateChangePivotData;
+import com.cegis.deltaplan2100.models.ClimateScenarioSubItemList;
 import com.cegis.deltaplan2100.models.InvestmentProjectList;
 import com.cegis.deltaplan2100.models.MacroEconIndicatorPivotData;
 import com.cegis.deltaplan2100.models.MacroEconIndicatorsList;
@@ -139,6 +141,13 @@ public interface API {
 
     @GET("Content/BwdbProjectLayer")
     Call<String> getBwdbProjectLayer();
+
+    @GET("Content/LgedProjectLayer")
+    Call<String> getLgedProjectLayer();
+
+    @GET("Content/ClimateScenarioSubItemList")
+    Call<List<ClimateScenarioSubItemList>> getClimateScenarioSubItemList();
+
+    @GET("Content/ClimateChangePivotData/{subitem_id}")
+    Call<List<ClimateChangePivotData>> getClimateChangePivotList(@Path("subitem_id") int subitem_id);
 }
-
-

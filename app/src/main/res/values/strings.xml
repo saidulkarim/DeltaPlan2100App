@@ -11,7 +11,7 @@
     <string name="close_notification">Are you want to close this apps?</string>
     <string name="nav_header_title">Delta Plan 2100</string>
     <string name="nav_header_desc">Delta Plan 2100</string>
-    <string name="nav_header_subtitle">CEGIS</string>
+    <string name="nav_header_subtitle">CEGIS | WUR</string>
     <string name="action_settings">Settings</string>
     <string name="action_symbol_layer_info">Layer Map</string>
     <string name="activity_draw_geojson_line">Draw GeoJSON Line</string>

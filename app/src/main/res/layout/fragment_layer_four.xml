@@ -6,6 +6,7 @@
     android:orientation="vertical">
 
     <TextView
+        android:id="@+id/txtOptionItemsParentName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="10dp"
@@ -27,7 +28,19 @@
         android:background="@drawable/spinner"
         android:gravity="left|center"
         android:spinnerMode="dropdown"
-        android:tooltipText="Key Macroeconomic Indicators BDP Policy Options" />
+        android:tooltipText="Key Indicators Options" />
+
+    <Spinner
+        android:id="@+id/spnrClimateChangeScenarios"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="0dp"
+        android:layout_marginRight="10dp"
+        android:background="@drawable/spinner"
+        android:gravity="left|center"
+        android:spinnerMode="dropdown"
+        android:tooltipText="Key Climate Change Scenarios Options" />
 
     <!-- First Row-->
     <LinearLayout

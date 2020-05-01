@@ -31,6 +31,7 @@ import com.cegis.deltaplan2100.MainActivity;
 import com.cegis.deltaplan2100.R;
 import com.cegis.deltaplan2100.models.InvestmentProjectList;
 import com.cegis.deltaplan2100.models.MacroEconIndicatorsList;
+import com.cegis.deltaplan2100.models.MapLegendItem;
 import com.cegis.deltaplan2100.utility.GenerateHtmlContent;
 import com.cegis.deltaplan2100.utility.HttpGetRequest;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -110,8 +111,7 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textField;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textSize;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
 
-public class MapFragment extends Fragment implements OnMapReadyCallback,
-        MapboxMap.OnMapClickListener, PermissionsListener {
+public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxMap.OnMapClickListener, PermissionsListener {
     private PermissionsManager permissionsManager;
     private MapViewModel mViewModel;
     private View root;
@@ -121,10 +121,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     private Spinner spnrHotspotList, spnrInvestProjList;
 
     private int itemID, itemParentLevel;
-    private String groupHeader, itemContentAs;
+    private String groupHeader, itemContentAs, htmlRawContent = new String();
+    private static final String EMPTY_STRING = "";
     private boolean isFabOpen = false, isFabSubOpen = false;
-
-    private String htmlRawContent = new String();
 
     private static final String ADMIN_BOUNDARY_LAYER = "ADMIN_BOUNDARY_LAYER";
     private static final String ADMIN_BOUNDARY_LINE_LAYER = "ADMIN_BOUNDARY_LINE_LAYER";
@@ -142,6 +141,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     public FeatureCollection featureCollection;
 
     private ArrayList<InvestmentProjectList> lstInvestmentProjectHotspotList, lstInvestmentProjectList;
+    private List<MapLegendItem> lstMapLegendItem = new ArrayList<>();
     private ArrayList<String> list = new ArrayList<String>(), listHotSpot = new ArrayList<String>();
     private static String textView = "";
 
@@ -360,6 +360,28 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                             PropertyFactory.lineWidth(2f),
                             PropertyFactory.lineColor(Color.parseColor("#C95F09"))
                     ));
+
+            SymbolLayer labelLayer = new SymbolLayer(PROJECT_LABEL_LAYER, PROJECT_LAYER)
+                    .withProperties(
+                            textField(get("GW_TABLE_M")),
+                            textSize(10f),
+                            textColor(Color.RED),
+                            textVariableAnchor(new String[]{TEXT_ANCHOR_TOP, TEXT_ANCHOR_BOTTOM, TEXT_ANCHOR_LEFT, TEXT_ANCHOR_RIGHT}),
+                            textJustify(TEXT_JUSTIFY_AUTO),
+                            textRadialOffset(0.5f));
+
+            style.addLayerAbove(labelLayer, ADMIN_BOUNDARY_FILL_LAYER);
+
+            MapLegendItem mapLegendItem = new MapLegendItem();
+            mapLegendItem.setTitle("Administrative Boundary");
+            mapLegendItem.setSubTitle(EMPTY_STRING);
+            mapLegendItem.setSourceLayerName(ADMIN_BOUNDARY_LAYER);
+            mapLegendItem.setFillLayerName(ADMIN_BOUNDARY_FILL_LAYER);
+            mapLegendItem.setFillLayerColor("#F2F2F2");
+            mapLegendItem.setLineLayerName(ADMIN_BOUNDARY_LINE_LAYER);
+            mapLegendItem.setLineStyle("Dashed 2f");
+            mapLegendItem.setLineLayerColor("#C95F09");
+            lstMapLegendItem.add(mapLegendItem);
         } catch (Throwable throwable) {
             Snackbar.make(this.getView(), "Could not add admin boundary source to map", Snackbar.LENGTH_LONG)
                     .setAction("Action", null)
@@ -428,6 +450,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                         fillOpacity(0.8f)
                 );
 
+                style.addLayer(new LineLayer(PROJECT_LINE_LAYER, PROJECT_LAYER)
+                        .withProperties(
+                                PropertyFactory.lineWidth(1f),
+                                PropertyFactory.lineColor(Color.parseColor("#3B7699"))
+                        ));
+
                 SymbolLayer labelLayer = new SymbolLayer(PROJECT_LABEL_LAYER, PROJECT_LAYER)
                         .withProperties(
                                 textField(get("2. Title")),
@@ -453,64 +481,179 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 if (layer != null) {
                     layer.setProperties(visibility(NONE));
                 }
+
+                MapLegendItem mapLegendItem = new MapLegendItem();
+                mapLegendItem.setTitle("BWDB Project");
+                mapLegendItem.setSubTitle(EMPTY_STRING);
+                mapLegendItem.setSourceLayerName(PROJECT_LAYER);
+                mapLegendItem.setFillLayerName(PROJECT_FILL_LAYER);
+                mapLegendItem.setFillLayerColor("#65A0C3");
+                mapLegendItem.setLineLayerName(PROJECT_LINE_LAYER);
+                mapLegendItem.setLineStyle("Solid 1f");
+                mapLegendItem.setLineLayerColor("#3B7699");
+                lstMapLegendItem.add(mapLegendItem);
             } catch (Throwable throwable) {
                 Snackbar.make(this.getView(), "Couldn't add BWDB source to map", Snackbar.LENGTH_LONG)
                         .setAction("Action", null)
                         .show();
             }
         });
-
-
     }
     //endregion
 
     //layer position: 2
-    //lged project layer
+    //reigon LGED Project Layer
     private void addLgedProjLayerToMap(@NonNull Style style) {
-        try {
-            //URI uri = new URI(API.MAP_BASE_URL + "water_resources_wgs84/lgedprj.json");
-            //GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, uri);
-
-            GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI("asset://water_resources_wgs84/lgedprj.json"));
-            style.addSource(source);
-
-            FillLayer fillLayer = new FillLayer(PROJECT_FILL_LAYER, PROJECT_LAYER);
-            fillLayer.setProperties(
-                    fillColor(Color.parseColor("#65A0C3")),
-                    fillOpacity(0.8f)
-            );
-
-            SymbolLayer labelLayer = new SymbolLayer(PROJECT_LABEL_LAYER, PROJECT_LAYER)
-                    .withProperties(
-                            textField(get("SPNAME")),
-                            textSize(10f),
-                            textColor(Color.RED),
-                            textVariableAnchor(new String[]{TEXT_ANCHOR_TOP, TEXT_ANCHOR_BOTTOM, TEXT_ANCHOR_LEFT, TEXT_ANCHOR_RIGHT}),
-                            textJustify(TEXT_JUSTIFY_AUTO),
-                            textRadialOffset(0.5f));
-
-            SymbolLayer symbolLayer = new SymbolLayer(PROJECT_SYMBOL_LAYER, PROJECT_LAYER)
-                    .withProperties(
-                            PropertyFactory.iconImage(MAP_MARKER_ICON),
-                            iconAllowOverlap(false),
-                            iconIgnorePlacement(false),
-                            iconOffset(new Float[]{0f, -2f})
-                    );
-
-            style.addLayerAbove(fillLayer, ADMIN_BOUNDARY_FILL_LAYER);
-            style.addLayerAbove(labelLayer, PROJECT_FILL_LAYER);
-            style.addLayerAbove(symbolLayer, PROJECT_LABEL_LAYER);
-
-            Layer layer = style.getLayer(PROJECT_LABEL_LAYER);
-            if (layer != null) {
-                layer.setProperties(visibility(NONE));
-            }
-        } catch (Throwable throwable) {
-            Snackbar.make(this.getView(), "Couldn't add LGED to map", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null)
-                    .show();
-        }
+//        try {
+//            //URI uri = new URI(API.MAP_BASE_URL + "water_resources_wgs84/lgedprj.json");
+//            //GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, uri);
+//
+//            GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI("asset://water_resources_wgs84/lgedprj.json"));
+//            style.addSource(source);
+//
+//            FillLayer fillLayer = new FillLayer(PROJECT_FILL_LAYER, PROJECT_LAYER);
+//            fillLayer.setProperties(
+//                    fillColor(Color.parseColor("#65A0C3")),
+//                    fillOpacity(0.8f)
+//            );
+//
+//            SymbolLayer labelLayer = new SymbolLayer(PROJECT_LABEL_LAYER, PROJECT_LAYER)
+//                    .withProperties(
+//                            textField(get("SPNAME")),
+//                            textSize(10f),
+//                            textColor(Color.RED),
+//                            textVariableAnchor(new String[]{TEXT_ANCHOR_TOP, TEXT_ANCHOR_BOTTOM, TEXT_ANCHOR_LEFT, TEXT_ANCHOR_RIGHT}),
+//                            textJustify(TEXT_JUSTIFY_AUTO),
+//                            textRadialOffset(0.5f));
+//
+//            SymbolLayer symbolLayer = new SymbolLayer(PROJECT_SYMBOL_LAYER, PROJECT_LAYER)
+//                    .withProperties(
+//                            PropertyFactory.iconImage(MAP_MARKER_ICON),
+//                            iconAllowOverlap(false),
+//                            iconIgnorePlacement(false),
+//                            iconOffset(new Float[]{0f, -2f})
+//                    );
+//
+//            style.addLayerAbove(fillLayer, ADMIN_BOUNDARY_FILL_LAYER);
+//            style.addLayerAbove(labelLayer, PROJECT_FILL_LAYER);
+//            style.addLayerAbove(symbolLayer, PROJECT_LABEL_LAYER);
+//
+//            Layer layer = style.getLayer(PROJECT_LABEL_LAYER);
+//            if (layer != null) {
+//                layer.setProperties(visibility(NONE));
+//            }
+//        } catch (Throwable throwable) {
+//            Snackbar.make(this.getView(), "Couldn't add LGED to map", Snackbar.LENGTH_LONG)
+//                    .setAction("Action", null)
+//                    .show();
+//        }
     }
+
+    private void getLgedProjLayer() {
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .create();
+
+        OkHttpClient okHttpClient = API.getUnsafeOkHttpClient();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(API.BASE_URL)
+                .client(okHttpClient)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+
+        API api = retrofit.create(API.class);
+        retrofit2.Call call = api.getBwdbProjectLayer();
+
+        call.enqueue(new Callback<String>() {
+            @Override
+            public void onResponse(retrofit2.Call<String> call, Response<String> response) {
+                if (response.isSuccessful()) {
+                    try {
+                        String data = response.body();
+
+                        if (!data.isEmpty()) {
+                            addBwdbProjLayerToMap(data);
+                        } else {
+                            Toast.makeText(getContext(), "Sorry, no data found!", Toast.LENGTH_LONG).show();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void addLgedProjLayerToMap(String data) {
+        mapboxMap.getStyle(style -> {
+            try {
+                //GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI("asset://water_resources_wgs84/bwdbprj.json"));
+                GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, data);
+                style.addSource(source);
+
+                FillLayer fillLayer = new FillLayer(PROJECT_FILL_LAYER, PROJECT_LAYER);
+                fillLayer.setProperties(
+                        fillColor(Color.parseColor("#65A0C3")),
+                        fillOpacity(0.8f)
+                );
+
+                style.addLayer(new LineLayer(PROJECT_LINE_LAYER, PROJECT_LAYER)
+                        .withProperties(
+                                PropertyFactory.lineWidth(1f),
+                                PropertyFactory.lineColor(Color.parseColor("#3B7699"))
+                        ));
+
+                SymbolLayer labelLayer = new SymbolLayer(PROJECT_LABEL_LAYER, PROJECT_LAYER)
+                        .withProperties(
+                                textField(get("2. Title")),
+                                textSize(10f),
+                                textColor(Color.RED),
+                                textVariableAnchor(new String[]{TEXT_ANCHOR_TOP, TEXT_ANCHOR_BOTTOM, TEXT_ANCHOR_LEFT, TEXT_ANCHOR_RIGHT}),
+                                textJustify(TEXT_JUSTIFY_AUTO),
+                                textRadialOffset(0.5f));
+
+                SymbolLayer symbolLayer = new SymbolLayer(PROJECT_SYMBOL_LAYER, PROJECT_LAYER)
+                        .withProperties(
+                                PropertyFactory.iconImage(MAP_MARKER_ICON),
+                                iconAllowOverlap(false),
+                                iconIgnorePlacement(false),
+                                iconOffset(new Float[]{0f, -2f})
+                        );
+
+                style.addLayerAbove(fillLayer, ADMIN_BOUNDARY_FILL_LAYER);
+                style.addLayerAbove(labelLayer, PROJECT_FILL_LAYER);
+                style.addLayerAbove(symbolLayer, PROJECT_LABEL_LAYER);
+
+                Layer layer = style.getLayer(PROJECT_LABEL_LAYER);
+                if (layer != null) {
+                    layer.setProperties(visibility(NONE));
+                }
+
+                MapLegendItem mapLegendItem = new MapLegendItem();
+                mapLegendItem.setTitle("BWDB Project");
+                mapLegendItem.setSubTitle(EMPTY_STRING);
+                mapLegendItem.setSourceLayerName(PROJECT_LAYER);
+                mapLegendItem.setFillLayerName(PROJECT_FILL_LAYER);
+                mapLegendItem.setFillLayerColor("#65A0C3");
+                mapLegendItem.setLineLayerName(PROJECT_LINE_LAYER);
+                mapLegendItem.setLineStyle("Solid 1f");
+                mapLegendItem.setLineLayerColor("#3B7699");
+                lstMapLegendItem.add(mapLegendItem);
+            } catch (Throwable throwable) {
+                Snackbar.make(this.getView(), "Couldn't add BWDB source to map", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null)
+                        .show();
+            }
+        });
+    }
+    //endregion
 
     //layer position: 2
     //ground water zone layer
@@ -704,7 +847,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     //call level: 3
     //layer position: 3
     //Selected Investment Project Layer
-    private void addSelectedInvProjLayerToMap(String data) {
+    private void addSelectedInvProjLayerToMap(String data, String item) {
         mapboxMap.getStyle(style -> {
             Source oldSource = style.getSource(PROJECT_LAYER);
 
@@ -759,10 +902,21 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                 style.addLayerAbove(labelLayer, PROJECT_FILL_LAYER);
                 //style.addLayerAbove(symbolLayer, PROJECT_FILL_LAYER);
 
-                Layer lblLayer = style.getLayer(PROJECT_LINE_LAYER);
+                Layer lblLayer = style.getLayer(PROJECT_LABEL_LAYER);
                 if (lblLayer != null) {
                     lblLayer.setProperties(visibility(NONE));
                 }
+
+                MapLegendItem mapLegendItem = new MapLegendItem();
+                mapLegendItem.setTitle("Investment Project");
+                mapLegendItem.setSubTitle(item);
+                mapLegendItem.setSourceLayerName(PROJECT_LAYER);
+                mapLegendItem.setFillLayerName(PROJECT_FILL_LAYER);
+                mapLegendItem.setFillLayerColor("#65A0C3");
+                mapLegendItem.setLineLayerName(PROJECT_LINE_LAYER);
+                mapLegendItem.setLineStyle("Solid 1f");
+                mapLegendItem.setLineLayerColor("#2A5F78");
+                lstMapLegendItem.add(mapLegendItem);
             } catch (Throwable throwable) {
                 Snackbar.make(this.getView(), "Couldn't add this investment project layer to map. " + throwable.getMessage(), Snackbar.LENGTH_LONG)
                         .setAction("Action", null)
@@ -897,7 +1051,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                                     String item = (String) parent.getItemAtPosition(position);
                                     String code = lstInvestmentProjectList.get(position).getCode();
 
-                                    getSelectedInvProjLayer(code);
+                                    getSelectedInvProjLayer(item, code);
                                 }
 
                                 @Override
@@ -932,7 +1086,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
     }
 
     //call level: 2
-    private void getSelectedInvProjLayer(String code) {
+    private void getSelectedInvProjLayer(String item, String code) {
         Gson gson = new GsonBuilder()
                 .setLenient()
                 .create();
@@ -955,7 +1109,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
                         String data = response.body();
 
                         if (!data.isEmpty()) {
-                            addSelectedInvProjLayerToMap(data);
+                            addSelectedInvProjLayerToMap(data, item);
                         } else {
                             Toast.makeText(getContext(), "Sorry, no data found!", Toast.LENGTH_LONG).show();
                         }
@@ -1040,28 +1194,24 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         getMapLegendInfo();
     }
 
-    public void getMapLegendInfo() {
-        mapboxMap.getStyle(style -> {
-            List<Source> sources = style.getSources();
-
-            if (sources.size() > 0) {
-                textView = "<span style='color: #97D44C; font-weight: bold;'>Layers</span><br />";
-                for (Source src : sources) {
-                    if (!src.getId().equals("composite") && !src.getId().equals("com.mapbox.annotations")) {
-                        GeoJsonSource gjs = style.getSourceAs(src.getId());
-                        List<Feature> testList = gjs.querySourceFeatures(Expression.literal(true));
-
-                        //textView += src.getId() + "___";
-                        String sourceName = src.getId();
-                        String contentLength = "" + testList.size();
-
-                        textView += "Source: " + sourceName +
-                                "<br />Contents: " + contentLength + " Polygon Features<br />";
-                    }
-                }
-            }
-        });
-
+    private void getMapLegendInfo() {
+        //mapboxMap.getStyle(style -> {
+        //    List<Source> sources = style.getSources();
+        //    if (sources.size() > 0) {
+        //        textView = "<span style='color: #97D44C; font-weight: bold;'>Layers</span><br />";
+        //        for (Source src : sources) {
+        //            if (!src.getId().equals("composite") && !src.getId().equals("com.mapbox.annotations")) {
+        //                GeoJsonSource gjs = style.getSourceAs(src.getId());
+        //                List<Feature> testList = gjs.querySourceFeatures(Expression.literal(tr
+        //                //textView += src.getId() + "___";
+        //                String sourceName = src.getId();
+        //                String contentLength = "" + testList.si
+        //                textView += "Source: " + sourceName +
+        //                        "<br />Contents: " + contentLength + " Polygon Features<br />";
+        //            }
+        //        }
+        //    }
+        //});
         //        String text = "<span style='color: #97D44C; font-weight: bold;'>Layers</span><br />" +
         //                "<div style='border-bottom: 1px solid #FFFFFF !important;'>" +
         //                "Name: Administrative Boundary<br />" +
@@ -1075,6 +1225,25 @@ public class MapFragment extends Fragment implements OnMapReadyCallback,
         //                "Contents: 250 Polygon Features<br />" +
         //                "Line: <span style='color: #C95F09;'>—</span><br />" +
         //                "</div>";
+
+        Style style = mapboxMap.getStyle();
+        if (lstMapLegendItem.size() > 0) {
+            textView = "<span style='color: #97D44C; font-weight: bold;'>Layers</span><br />";
+            for (MapLegendItem li : lstMapLegendItem) {
+                textView += "Title: " + li.getTitle();
+                textView += li.getSubTitle().isEmpty() ? "" : "<br />Sub Title: " + li.getSubTitle();
+                textView += li.getSourceLayerName().isEmpty() ? "" : "<br />Source Layer: " + li.getSourceLayerName();
+                textView += li.getFillLayerName().isEmpty() ? "" : "<br />Fill Layer: " + li.getFillLayerName();
+                textView += li.getFillLayerColor().isEmpty() ? "" : "<br />Fill Color: <i style='width: 50px; height: 50px; background-color: " + li.getFillLayerColor() + ";'></i>" + li.getFillLayerColor();
+                textView += li.getLineLayerName().isEmpty() ? "" : "<br />Line Layer: " + li.getLineLayerName();
+                textView += li.getLineStyle().isEmpty() ? "" : "<br />Line Style: " + li.getLineStyle();
+                textView += li.getLineLayerColor().isEmpty() ? "" : "<br />Line Color: " + li.getLineLayerColor();
+
+                GeoJsonSource gjs = style.getSourceAs(li.getSourceLayerName());
+                List<Feature> features = gjs.querySourceFeatures(Expression.literal(true));
+                textView += "<br />Contents: " + features.size() + " Polygon Features<br />";
+            }
+        }
 
         Snackbar snackbar = Snackbar.make(this.getView(), textView, Snackbar.LENGTH_INDEFINITE);
         TextView tv = snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text);

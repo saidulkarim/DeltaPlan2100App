@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModelProviders;
 import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
+import android.graphics.Paint;
+import android.graphics.RectF;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -29,6 +31,8 @@ import android.widget.Toast;
 import com.cegis.deltaplan2100.API;
 import com.cegis.deltaplan2100.MainActivity;
 import com.cegis.deltaplan2100.R;
+import com.cegis.deltaplan2100.models.ClimateChangePivotData;
+import com.cegis.deltaplan2100.models.ClimateScenarioSubItemList;
 import com.cegis.deltaplan2100.models.MacroEconIndicatorPivotData;
 import com.cegis.deltaplan2100.models.MacroEconIndicatorsList;
 import com.cegis.deltaplan2100.utility.FontawesomeLight;
@@ -36,7 +40,9 @@ import com.cegis.deltaplan2100.utility.GenerateHtmlContent;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
@@ -48,13 +54,17 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
+import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 import com.github.mikephil.charting.listener.ChartTouchListener;
 import com.github.mikephil.charting.listener.OnChartGestureListener;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.github.mikephil.charting.utils.MPPointF;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -83,7 +93,8 @@ public class LayerFourFragment extends Fragment {
     private LinearLayout btnLineChart, btnBarChart, btnPieChart, btnTableView,
             lilaLineChart, lilaBarChart, lilaPieChartBDP, lilaPieChartBAU, lilaTableContent;
     private FontawesomeLight txtLineChart, txtBarChart, txtPieChart, txtTableView;
-    private Spinner spnrMacroEconIndicator, spnrMacroEconIndicator2;
+    private Spinner spnrMacroEconIndicator, spnrClimateChangeScenarios;
+    private TextView txtOptionItemsParentName;
 
     private LineChart lineChart;
     private BarChart barChart;
@@ -91,12 +102,15 @@ public class LayerFourFragment extends Fragment {
     private WebView webViewTblContent;
 
     private ArrayList<MacroEconIndicatorsList> lstMacroEconIndicators;
+    private ArrayList<ClimateScenarioSubItemList> listCSSL;
     public List<MacroEconIndicatorPivotData> lstMEIPivotData;
+    private List<ClimateChangePivotData> lstClimateChangePivotData;
 
     private ArrayList<String> list = new ArrayList<String>();
+
     private int itemID, itemParentLevel;
     private String groupHeader, itemContentAs;
-    private List<String> fiscalYearList;
+    private List<String> fiscalYearList, climateScenarioYearList;
     private String[] color = {"#3297BB", "#0C4C6F", "#BB09BB", "#DC4C4E", "#7C7C7C", "#B47C2C", "#0FA18D", "#5A8732", "#04A9E1", "#4169E1", "#5E0B9B", "#42700D"};
 
     private boolean isChartSelected = false,
@@ -111,7 +125,9 @@ public class LayerFourFragment extends Fragment {
         root = inflater.inflate(R.layout.fragment_layer_four, container, false);
 
         //region control getting from view
+        txtOptionItemsParentName = root.findViewById(R.id.txtOptionItemsParentName);
         spnrMacroEconIndicator = root.findViewById(R.id.spnrMacroEconIndicator);
+        spnrClimateChangeScenarios = root.findViewById(R.id.spnrClimateChangeScenarios);
 
         btnLineChart = root.findViewById(R.id.btnLineChart);
         btnBarChart = root.findViewById(R.id.btnBarChart);
@@ -150,6 +166,8 @@ public class LayerFourFragment extends Fragment {
         groupHeader = getArguments().getString("GroupHeader");
         itemContentAs = getArguments().getString("ItemContentAs");
         itemParentLevel = getArguments().getInt("ItemParentLevel");
+
+        txtOptionItemsParentName.setText(groupHeader + " Options");
         //endregion receiving
 
         //region loading dropdown data
@@ -171,18 +189,6 @@ public class LayerFourFragment extends Fragment {
         //endregion
 
         //region action type activity
-        spnrMacroEconIndicator.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                //code
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                //code
-            }
-        });
-
         if (itemParentLevel == 2) {
             Toast.makeText(this.getContext(), "Item Parent Level 2", Toast.LENGTH_SHORT).show();
         } else if (itemParentLevel == 3) {
@@ -204,8 +210,58 @@ public class LayerFourFragment extends Fragment {
             } else if (itemContentAs.toLowerCase().contains("graph") ||
                     itemContentAs.toLowerCase().contains("chart") ||
                     itemContentAs.toLowerCase().contains("graphchart")) {
-                getFiscalYearList();
-                loadMacroEconIndicatorData(spnrMacroEconIndicator, 2); //BAU: 1; BDP: 2
+                if (!groupHeader.toLowerCase().equals("climate change")) {
+                    spnrClimateChangeScenarios.setVisibility(View.GONE);
+                    spnrMacroEconIndicator.setVisibility(View.VISIBLE);
+
+                    spnrMacroEconIndicator.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                            //code
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {
+                            //code
+                        }
+                    });
+
+                    getFiscalYearList();
+                    loadMacroEconIndicatorData(spnrMacroEconIndicator, 2); //BAU: 1; BDP: 2
+                } else {
+                    btnLineChart.setVisibility(View.GONE);
+                    btnBarChart.setVisibility(View.GONE);
+                    btnPieChart.setVisibility(View.GONE);
+                    btnTableView.setVisibility(View.GONE);
+
+                    barChart.setData(null);
+                    lilaBarChart.setVisibility(View.GONE);
+                    lineChart.setData(null);
+                    lilaLineChart.setVisibility(View.GONE);
+                    pieChartBDP.setData(null);
+                    lilaPieChartBDP.setVisibility(View.GONE);
+                    pieChartBAU.setData(null);
+                    lilaPieChartBAU.setVisibility(View.GONE);
+
+                    spnrMacroEconIndicator.setVisibility(View.GONE);
+                    spnrClimateChangeScenarios.setVisibility(View.VISIBLE);
+
+//                    spnrClimateChangeScenarios.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//                        @Override
+//                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                            //code
+//                        }
+//
+//                        @Override
+//                        public void onNothingSelected(AdapterView<?> parent) {
+//                            //code
+//                        }
+//                    });
+
+                    loadClimateChangeListData(spnrClimateChangeScenarios);
+                }
+
+                //Toast.makeText(getContext(), "Parent ID: " + itemID, Toast.LENGTH_LONG).show();
             }
         } else if (itemParentLevel == 4) {
             Log.i("Parent Level 4", "Not Implemented");
@@ -659,6 +715,10 @@ public class LayerFourFragment extends Fragment {
         //barChart.getDescription().setText(indicatorName + " (" + lstMEIPivotData.get(0).getFyValueUnit() + ")");
         //barChart.getDescription().setPosition(width - 200, height - (height - 25));
 
+        barChart.getAxisLeft().setEnabled(false); //show y-axis at left
+        barChart.getAxisRight().setEnabled(true); //hide y-axis at right
+
+
         barChart.animateXY(1000, 1000);
         barChart.invalidate();
 
@@ -958,6 +1018,469 @@ public class LayerFourFragment extends Fragment {
         });
     }
 
+    private void loadClimateChangeListData(Spinner spinner) {
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .create();
+        OkHttpClient okHttpClient = API.getUnsafeOkHttpClient();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(API.BASE_URL)
+                .client(okHttpClient)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+
+        API api = retrofit.create(API.class);
+        Call call = api.getClimateScenarioSubItemList();
+
+        call.enqueue(new Callback<List<ClimateScenarioSubItemList>>() {
+            @Override
+            public void onResponse(Call<List<ClimateScenarioSubItemList>> call, Response<List<ClimateScenarioSubItemList>> response) {
+                if (response.isSuccessful()) {
+                    try {
+                        List<ClimateScenarioSubItemList> responseList = response.body();
+                        list = new ArrayList<>();
+
+                        if (responseList.size() > 0) {
+                            listCSSL = new ArrayList<>();
+
+                            for (int i = 0; i < responseList.size(); i++) {
+                                ClimateScenarioSubItemList spinnerModel = new ClimateScenarioSubItemList();
+                                spinnerModel.setSubitemId(responseList.get(i).getSubitemId());
+                                spinnerModel.setSubitemName(responseList.get(i).getSubitemName());
+                                spinnerModel.setSubitemUnit(responseList.get(i).getSubitemUnit());
+                                spinnerModel.setSubitemDescription(responseList.get(i).getSubitemDescription());
+                                listCSSL.add(spinnerModel);
+
+                                list.add(responseList.get(i).getSubitemName());
+                            }
+
+                            spinner.setAdapter(null);
+                            ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<>(getContext(), simple_spinner_item, list);
+                            spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                            spinner.setAdapter(spinnerArrayAdapter);
+
+                            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                @Override
+                                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                    int subitem_id = listCSSL.get(position).getSubitemId();
+                                    getClimateChangeData(subitem_id);
+
+                                    //String item = (String) parent.getItemAtPosition(position);
+                                    //Toast.makeText(getContext(), item, Toast.LENGTH_LONG).show();
+                                    //((TextView) parent.getChildAt(0)).setTextColor(Color.parseColor("#2F4F4F"));
+                                }
+
+                                @Override
+                                public void onNothingSelected(AdapterView<?> parent) {
+
+                                }
+                            });
+                        } else {
+                            Toast.makeText(getContext(), "Sorry, no data found!", Toast.LENGTH_LONG).show();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<ClimateScenarioSubItemList>> call, Throwable t) {
+                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void getClimateChangeData(int scenario_subitem_id) {
+        String selected_item = spnrClimateChangeScenarios.getSelectedItem().toString();
+
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .create();
+        OkHttpClient okHttpClient = API.getUnsafeOkHttpClient();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(API.BASE_URL)
+                .client(okHttpClient)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+
+        API api = retrofit.create(API.class);
+        Call call = api.getClimateChangePivotList(scenario_subitem_id);
+
+        call.enqueue(new Callback<List<ClimateChangePivotData>>() {
+            @Override
+            public void onResponse(Call<List<ClimateChangePivotData>> call, Response<List<ClimateChangePivotData>> response) {
+                lstClimateChangePivotData = new ArrayList<>();
+
+                if (response.isSuccessful()) {
+                    try {
+                        List<ClimateChangePivotData> responseList = response.body();
+
+                        if (responseList.size() > 0) {
+                            climateScenarioYearList = new ArrayList<>();
+
+                            for (int i = 0; i < responseList.size(); i++) {
+                                String year = responseList.get(i).getScenarioDataYear().toString();
+                                climateScenarioYearList.add(year);
+                            }
+
+                            lstClimateChangePivotData.addAll(responseList);
+
+                            lilaBarChart.setVisibility(View.VISIBLE);
+                            lineChart.setData(null);
+                            lilaLineChart.setVisibility(View.GONE);
+                            pieChartBDP.setData(null);
+                            lilaPieChartBDP.setVisibility(View.GONE);
+                            pieChartBAU.setData(null);
+                            lilaPieChartBAU.setVisibility(View.GONE);
+
+                            loadCCSBarChart(selected_item, lstClimateChangePivotData);
+                            loadCCTableData(selected_item, lstClimateChangePivotData);
+                        } else {
+                            lstClimateChangePivotData = new ArrayList<>();
+                            Toast.makeText(getContext(), "Sorry, no data found!", Toast.LENGTH_LONG).show();
+                        }
+                    } catch (Exception e) {
+                        lstClimateChangePivotData = new ArrayList<>();
+                        e.printStackTrace();
+
+                        if (!e.getMessage().equals("empty String")) {
+                            Snackbar.make(getView(), e.getMessage(), Snackbar.LENGTH_LONG)
+                                    .setAction("Climate Change Data Loading Error", null)
+                                    .show();
+                        }
+                    }
+                } else {
+                    lstClimateChangePivotData = new ArrayList<>();
+                    Toast.makeText(getContext(), "Response not found.", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<ClimateChangePivotData>> call, Throwable t) {
+                lstClimateChangePivotData = new ArrayList<>();
+                Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    private void loadCCSBarChart(String selected_item, List<ClimateChangePivotData> lstCCSPivotData) {
+        BarData data = new BarData();
+        int groupCount = climateScenarioYearList.size();
+        int selected_position = spnrClimateChangeScenarios.getSelectedItemPosition();
+
+        if (lstCCSPivotData.size() > 0) {
+            ArrayList<BarEntry> barActiveEntries = new ArrayList<>();
+            ArrayList<BarEntry> barModerateEntries = new ArrayList<>();
+            ArrayList<BarEntry> barProductiveEntries = new ArrayList<>();
+            ArrayList<BarEntry> barResilientEntries = new ArrayList<>();
+
+            for (int i = 0; i < lstCCSPivotData.size(); i++) {
+                String valActive = lstCCSPivotData.get(i).getActive().toString();
+                barActiveEntries.add(new BarEntry(i, Float.parseFloat(valActive)));
+
+                String valModerate = lstCCSPivotData.get(i).getModerate().toString();
+                barModerateEntries.add(new BarEntry(i, Float.parseFloat(valModerate)));
+
+                String valProductive = lstCCSPivotData.get(i).getProductive().toString();
+                barProductiveEntries.add(new BarEntry(i, Float.parseFloat(valProductive)));
+
+                String valResilient = lstCCSPivotData.get(i).getResilient().toString();
+                barResilientEntries.add(new BarEntry(i, Float.parseFloat(valResilient)));
+            }
+
+            BarDataSet barDataSet0 = new BarDataSet(barActiveEntries, "Active");
+            barDataSet0.setColor(Color.parseColor("#000099"));
+            barDataSet0.setAxisDependency(YAxis.AxisDependency.RIGHT);
+            BarDataSet barDataSet1 = new BarDataSet(barModerateEntries, "Moderate");
+            barDataSet1.setColors(Color.parseColor("#ED1C24"));
+            BarDataSet barDataSet2 = new BarDataSet(barProductiveEntries, "Productive");
+            barDataSet2.setColors(Color.parseColor("#59A550"));
+            BarDataSet barDataSet3 = new BarDataSet(barResilientEntries, "Resilient");
+            barDataSet3.setColors(Color.parseColor("#F68928"));
+
+            String[] years = climateScenarioYearList.toArray(new String[climateScenarioYearList.size()]);
+            data = new BarData(barDataSet0, barDataSet1, barDataSet2, barDataSet3);
+            barChart.setData(data);
+
+            XAxis xAxis = barChart.getXAxis();
+            xAxis.setValueFormatter(new IndexAxisValueFormatter(years));
+            xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+            xAxis.setGranularity(1);
+            //xAxis.setDrawGridLines(true);
+            xAxis.setCenterAxisLabels(true);
+            xAxis.setGranularityEnabled(true);
+
+            float barSpace = 0.02f;
+            float groupSpace = 0.3f;
+            //int groupCount = 6;
+
+            //IMPORTANT *****
+            data.setBarWidth(0.15f);
+            barChart.getXAxis().setAxisMinimum(0);
+            barChart.getXAxis().setAxisMaximum(0 + barChart.getBarData().getGroupWidth(groupSpace, barSpace) * groupCount);
+            barChart.getAxisLeft().setAxisMinimum(0);
+            barChart.groupBars(0, groupSpace, barSpace); // perform the "explicit" grouping
+            //***** IMPORTANT
+        }
+
+//        YAxis yAxisLeft = barChart.getAxisLeft();
+//        yAxisLeft.setAxisMinimum(0);
+//        barChart.yAxis(0).title("Y-Axis with labels");
+
+        barChart.setDragEnabled(true);
+        barChart.setVisibleXRangeMaximum(3);
+        barChart.getXAxis().setDrawGridLines(false);
+        barChart.getAxisLeft().setDrawGridLines(false);
+        barChart.getAxisRight().setDrawGridLines(false);
+
+        //measurement data
+        //float groupSpace = 0.04f;
+        //float barSpace = 0.02f;
+        //float barWidth = 0.46f;
+        // (0.46 + 0.02) * 2 + 0.04 = 1.00 -> interval per "group"
+
+//        float groupSpace = 0.04f;
+//        float barSpace = 0.02f;
+//        float barWidth = 0.46f;
+//        data.setBarWidth(barWidth);
+//
+//        barChart.getXAxis().setAxisMinimum(0);
+//        barChart.getXAxis().setAxisMaximum(0 + barChart.getBarData().getGroupWidth(groupSpace, barSpace) * 4);
+//        barChart.getAxisLeft().setAxisMinimum(0);
+//        barChart.groupBars(0, groupSpace, barSpace);
+
+        int width = barChart.getWidth();
+        int height = barChart.getHeight();
+        Description desc = new Description();
+        String title = "Unit: " + listCSSL.get(selected_position).getSubitemUnit();
+        desc.setText(title);
+        desc.setTextSize(13f);
+        desc.setYOffset(20f);
+        desc.setTextAlign(Paint.Align.CENTER);
+        desc.setPosition(width - 500, height - (height - 60));
+        barChart.setDescription(desc);
+        barChart.getDescription().setXOffset(10f);
+
+//        Description desc1 = new Description();
+//        String title1 = listCSSL.get(selected_position).getSubitemDescription();
+//        desc1.setText(title1);
+//        desc1.setTextSize(13f);
+//        desc1.setTextAlign(Paint.Align.CENTER);
+//        desc1.setPosition(width - 500, height - (height - 60));
+//        barChart.setDescription(desc1);
+
+        YAxis rightYAxis = barChart.getAxisRight();
+        rightYAxis.setEnabled(false);
+        rightYAxis.setDrawGridLines(true);
+
+        YAxis leftYAxis = barChart.getAxisLeft();
+        leftYAxis.setEnabled(true);
+        leftYAxis.setDrawAxisLine(true);
+        leftYAxis.setDrawGridLines(true);
+        //leftYAxis.setValueFormatter("Values");
+
+        Legend l = barChart.getLegend();
+        l.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+        l.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+        l.setForm(Legend.LegendForm.CIRCLE);
+        l.setTextSize(13f);
+
+        //Toast.makeText(getContext(), width + " :: wh :: " + height, Toast.LENGTH_SHORT).show();
+        //barChart.getDescription().setText(indicatorName + " (" + lstMEIPivotData.get(0).getFyValueUnit() + ")");
+        //barChart.getDescription().setPosition(width - 200, height - (height - 25));
+
+        barChart.animateXY(1000, 1000);
+        barChart.setExtraOffsets(5f, 50f, 2f, 10f);
+        barChart.invalidate();
+
+        barChart.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            protected RectF mOnValueSelectedRectF = new RectF();
+
+            @Override
+            public void onValueSelected(Entry e, Highlight h) {
+                if (e == null)
+                    return;
+
+                BarEntry pe = (BarEntry) e;
+
+                RectF bounds = mOnValueSelectedRectF;
+                barChart.getBarBounds((BarEntry) e, bounds);
+                MPPointF position = barChart.getPosition(e, YAxis.AxisDependency.LEFT);
+
+                final String xAxisLabel = barChart.getXAxis().getValueFormatter().getFormattedValue(e.getX(), barChart.getXAxis());
+
+                Log.i("Year", xAxisLabel);
+                Log.i("Value", e.getY() + "");
+                Log.i("Scenario Name", getScenarioNameByIndex(h.getDataSetIndex()));
+
+                String info = "Year: " + xAxisLabel + "" +
+                        "\nScenario Name: " + getScenarioNameByIndex(h.getDataSetIndex()) +
+                        "\nValue: " + e.getY();
+
+                Snackbar snackbar = Snackbar.make(getView(), info, Snackbar.LENGTH_LONG);
+                TextView tv = snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text);
+                tv.setMaxLines(3);
+                snackbar.show();
+
+                //Log.i("bounds", bounds.toString());
+                //Log.i("position", position.toString());
+                //Log.i("VAL SELECTED", "Value: " + e.getY() + ", xIndex: " + e.getX()
+                //        + ", DataSet index: " + h.getDataSetIndex());
+                //Log.i(TAG, "Selected Value:" + pe.getX());
+                //Log.i(TAG, "Selected Label:" + pe.getYVals());
+                //Toast.makeText(getContext(), "Value: " + e.getY() + ", xIndex: " + e.getX() + ", DataSet index: " + h.getDataSetIndex() + ", Data Index: " + h.getDataIndex(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onNothingSelected() {
+
+            }
+        });
+
+        barChart.setOnChartGestureListener(new OnChartGestureListener() {
+            @Override
+            public void onChartGestureStart(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
+
+            }
+
+            @Override
+            public void onChartGestureEnd(MotionEvent me, ChartTouchListener.ChartGesture lastPerformedGesture) {
+
+            }
+
+            @Override
+            public void onChartLongPressed(MotionEvent me) {
+
+            }
+
+            @Override
+            public void onChartDoubleTapped(MotionEvent me) {
+                Float a = barChart.getHighlightByTouchPoint(me.getX(), me.getY()).getX();
+                Float b = barChart.getHighlightByTouchPoint(me.getX(), me.getY()).getY();
+
+                //Toast.makeText(getContext(), a + " :: ab :: " + b, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onChartSingleTapped(MotionEvent me) {
+
+            }
+
+            @Override
+            public void onChartFling(MotionEvent me1, MotionEvent me2, float velocityX, float velocityY) {
+
+            }
+
+            @Override
+            public void onChartScale(MotionEvent me, float scaleX, float scaleY) {
+
+            }
+
+            @Override
+            public void onChartTranslate(MotionEvent me, float dX, float dY) {
+
+            }
+        });
+    }
+
+    private void loadCCTableData(String selected_item, List<ClimateChangePivotData> lstCCSPivotData) {
+        String content = new String();
+        String[] fyList = climateScenarioYearList.toArray(new String[climateScenarioYearList.size()]);
+
+        if (lstCCSPivotData.size() > 0) {
+            lilaTableContent.setVisibility(View.VISIBLE);
+
+            content = "<html>\n" +
+                    "<head>\n" +
+                    "<style>\n" +
+                    "\ttable {\n" +
+                    "\t\tborder-collapse: collapse;\n" +
+                    "\t\twidth: 100%;\n" +
+                    "\t\tfont-size: 80%;\n" +
+                    "\t}\n" +
+                    "\tth, td {\n" +
+                    "\t\tborder: 1px solid #c6c7cc; padding: 10px 15px;\n" +
+                    "\t}\n" +
+                    "\tth {\n" +
+                    "\t\tfont-weight: bold;\n" +
+                    "\t}\n" +
+                    "\t.group-header {\n" +
+                    "\t\tbackground: #D3DADF;\n" +
+                    "\t\tcolor: #237A98;\n" +
+                    "\t\tfont-weight: bold;\n" +
+                    "\t}\n" +
+                    "\t.odd {\n" +
+                    "\t\tbackground: #F2F2F2;\n" +
+                    "\t}\n" +
+                    "\t.even {\n" +
+                    "\t\tbackground: #FAFAF7;\n" +
+                    "\t}\n" +
+                    "</style>\n" +
+                    "</head>\n" +
+                    "<body>\n" +
+                    "<div style=\"max-height: 250px; overflow: overflow-y;\">\n" +
+                    "<table>\n" +
+                    "<tbody>\n" +
+                    "<tr>\n" +
+                    "<td class=\"group-header\" colspan=\"5\" style=\"text-align: center;\">" + selected_item + "</td>\n" +
+                    "</tr>\n" +
+                    "<tr>\n" +
+                    "<td class=\"group-header\" style=\"text-align: center;\">Year</td>\n" +
+                    "<td class=\"group-header\" style=\"text-align: center;\">Active</td>\n" +
+                    "<td class=\"group-header\" style=\"text-align: center;\">Moderate</td>\n" +
+                    "<td class=\"group-header\" style=\"text-align: center;\">Productive</td>\n" +
+                    "<td class=\"group-header\" style=\"text-align: center;\">Resilient</td>\n" +
+                    "</tr>";
+
+            for (int i = 0; i < lstCCSPivotData.size(); i++) {
+                String val1 = lstCCSPivotData.get(i).getScenarioDataYear().toString();
+                String val2 = lstCCSPivotData.get(i).getActive().toString();
+                String val3 = lstCCSPivotData.get(i).getModerate().toString();
+                String val4 = lstCCSPivotData.get(i).getProductive().toString();
+                String val5 = lstCCSPivotData.get(i).getResilient().toString();
+
+                content += "\t\t\t\t<tr>\n" +
+                        "\t\t\t\t\t<td class=\"even\">" + val1 + "</td>\n" +
+                        "\t\t\t\t\t<td class=\"even\" style=\"text-align: right;\">" + val2 + "</td>\n" +
+                        "\t\t\t\t\t<td class=\"even\" style=\"text-align: right;\">" + val3 + "</td>\n" +
+                        "\t\t\t\t\t<td class=\"even\" style=\"text-align: right;\">" + val4 + "</td>\n" +
+                        "\t\t\t\t\t<td class=\"even\" style=\"text-align: right;\">" + val5 + "</td>\n" +
+                        "\t\t\t\t</tr>\n";
+            }
+
+            content += "\t\t\t</tbody>  \n" +
+                    "\t\t</table>\n" +
+                    "\t</div>\n" +
+                    "\t</body>\n" +
+                    "</html>";
+        }
+
+        webViewTblContent.setVisibility(View.VISIBLE);
+        webViewTblContent.loadDataWithBaseURL(null, content, "text/HTML", "UTF-8", null);
+    }
+
+    private String getScenarioNameByIndex(int index) {
+        switch (index) {
+            case 0:
+                return "Active";
+
+            case 1:
+                return "Moderate";
+
+            case 2:
+                return "Productive";
+
+            case 3:
+                return "Resilient";
+
+            default:
+                return "";
+        }
+    }
+
     private void getTextTableHtmlContent() {
         Toast.makeText(getContext(), groupHeader, Toast.LENGTH_LONG).show();
 
@@ -1017,6 +1540,31 @@ public class LayerFourFragment extends Fragment {
     }
 
     private String getFieldNamesAndValues(String fieldName, MacroEconIndicatorPivotData data) {
+        String result = "";
+
+        for (Field f : data.getClass().getDeclaredFields()) {
+            f.setAccessible(true);
+            Object o;
+
+            try {
+                o = f.get(data);
+            } catch (Exception e) {
+                o = e;
+                result = "";
+            }
+
+            //Log.i(TAG, f.getGenericType() + " " + f.getName() + "= " + o);
+
+            if (f.getName().contains(fieldName)) {
+                result = o.toString();
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    private String getCCSFieldNamesAndValues(String fieldName, ClimateChangePivotData data) {
         String result = "";
 
         for (Field f : data.getClass().getDeclaredFields()) {
