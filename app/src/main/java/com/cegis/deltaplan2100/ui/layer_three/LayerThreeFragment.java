@@ -133,9 +133,9 @@ public class LayerThreeFragment extends Fragment {
     }
 
     private void getTextTableHtmlContent() {
-        if (groupHeader.equals("Delta Challenges")) {
-            webView.loadDataWithBaseURL("file:///android_asset/", readAssetFileAsString("delta_challanges.html"), "text/html", "UTF-8", null);
-        } else {
+        //if (groupHeader.equals("Delta Challenges")) {
+        //    webView.loadDataWithBaseURL("file:///android_asset/", readAssetFileAsString("delta_challanges.html"), "text/html", "UTF-8", null);
+        //} else {
             ProgressDialog dialog = ProgressDialog.show(getActivity(), "", "Please wait...", true);
 
             Gson gson = new GsonBuilder()
@@ -168,7 +168,7 @@ public class LayerThreeFragment extends Fragment {
                     Toast.makeText(getContext(), t.getMessage(), Toast.LENGTH_LONG).show();
                 }
             });
-        }
+        //}
     }
 
     private String readAssetFileAsString(String sourceHtmlLocation) {

@@ -29,15 +29,10 @@ import retrofit2.http.POST;
 import retrofit2.http.Path;
 
 public interface API {
-    String BASE_URL = "https://130.180.3.215:8080/api/";
-    //String BASE_URL = "https://130.180.3.215/api/";
-    //String BASE_URL = "http://130.180.3.146/BDP2100API/api/";
+    String BASE_URL = "https://130.180.3.215:8080/api/"; //local server
     //String BASE_URL = "https://202.53.173.179/BDP2100API/api/"; //online server
 
-    //String MAP_BASE_URL = "http://130.180.3.215:7669/AppMaps/";
-    //String MAP_BASE_URL = "https://130.180.3.215/AppMaps/";
     String MAP_BASE_URL = "https://202.53.173.179/BDP2100AppMap/AppMaps/"; //online server
-    //String MAP_BASE_URL = "http://130.180.3.146/BDP2100API/AppMaps/"; //online server
 
     static OkHttpClient getUnsafeOkHttpClient() {
         try {

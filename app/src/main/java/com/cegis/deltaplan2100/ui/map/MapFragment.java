@@ -1,10 +1,12 @@
 package com.cegis.deltaplan2100.ui.map;
 
+import android.app.Dialog;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
@@ -144,12 +146,15 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
     private List<MapLegendItem> lstMapLegendItem = new ArrayList<>();
     private ArrayList<String> list = new ArrayList<String>(), listHotSpot = new ArrayList<String>();
     private static String textView = "";
+    Dialog myDialog;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Mapbox.getInstance(this.getContext(), getString(R.string.map_access_token));
         tf = Typeface.createFromAsset(this.getContext().getAssets(), "fonts/titillium_semi_bold.ttf");
+
+        myDialog = new Dialog(getContext());
     }
 
     @Override
@@ -214,7 +219,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
 
             TooltipCompat.setTooltipText(fabDetails, "View Map Legend");
             fabDetails.setAlpha(0.90f);
-            fabDetails.setOnClickListener(view -> fabDetailsClick());
+            //fabDetails.setOnClickListener(view -> fabDetailsClick());
+            fabDetails.setOnClickListener(view -> ShowPopup(getView()));
         }
         //endregion
 
@@ -298,7 +304,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
                         if (groupHeader.toLowerCase().contains("bwdb")) {
                             prjName = feature.properties().get("2. Title").toString().replaceAll(regex, "");
                         } else if (groupHeader.toLowerCase().contains("lged")) {
-                            prjName = feature.properties().get("SPNAME").toString().replaceAll(regex, "");
+                            prjName = feature.properties().get("2. Title").toString().replaceAll(regex, "");
                         } else if (groupHeader.toLowerCase().contains("flood prone")) {
                             prjName = feature.properties().get("TYPE").toString().replaceAll(regex, "");
                         } else if (groupHeader.toLowerCase().contains("ground water zone")) {
@@ -504,49 +510,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
     //layer position: 2
     //reigon LGED Project Layer
     private void addLgedProjLayerToMap(@NonNull Style style) {
-//        try {
-//            //URI uri = new URI(API.MAP_BASE_URL + "water_resources_wgs84/lgedprj.json");
-//            //GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, uri);
-//
-//            GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI("asset://water_resources_wgs84/lgedprj.json"));
-//            style.addSource(source);
-//
-//            FillLayer fillLayer = new FillLayer(PROJECT_FILL_LAYER, PROJECT_LAYER);
-//            fillLayer.setProperties(
-//                    fillColor(Color.parseColor("#65A0C3")),
-//                    fillOpacity(0.8f)
-//            );
-//
-//            SymbolLayer labelLayer = new SymbolLayer(PROJECT_LABEL_LAYER, PROJECT_LAYER)
-//                    .withProperties(
-//                            textField(get("SPNAME")),
-//                            textSize(10f),
-//                            textColor(Color.RED),
-//                            textVariableAnchor(new String[]{TEXT_ANCHOR_TOP, TEXT_ANCHOR_BOTTOM, TEXT_ANCHOR_LEFT, TEXT_ANCHOR_RIGHT}),
-//                            textJustify(TEXT_JUSTIFY_AUTO),
-//                            textRadialOffset(0.5f));
-//
-//            SymbolLayer symbolLayer = new SymbolLayer(PROJECT_SYMBOL_LAYER, PROJECT_LAYER)
-//                    .withProperties(
-//                            PropertyFactory.iconImage(MAP_MARKER_ICON),
-//                            iconAllowOverlap(false),
-//                            iconIgnorePlacement(false),
-//                            iconOffset(new Float[]{0f, -2f})
-//                    );
-//
-//            style.addLayerAbove(fillLayer, ADMIN_BOUNDARY_FILL_LAYER);
-//            style.addLayerAbove(labelLayer, PROJECT_FILL_LAYER);
-//            style.addLayerAbove(symbolLayer, PROJECT_LABEL_LAYER);
-//
-//            Layer layer = style.getLayer(PROJECT_LABEL_LAYER);
-//            if (layer != null) {
-//                layer.setProperties(visibility(NONE));
-//            }
-//        } catch (Throwable throwable) {
-//            Snackbar.make(this.getView(), "Couldn't add LGED to map", Snackbar.LENGTH_LONG)
-//                    .setAction("Action", null)
-//                    .show();
-//        }
+        getLgedProjLayer();
     }
 
     private void getLgedProjLayer() {
@@ -564,7 +528,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
                 .build();
 
         API api = retrofit.create(API.class);
-        retrofit2.Call call = api.getBwdbProjectLayer();
+        retrofit2.Call call = api.getLgedProjectLayer();
 
         call.enqueue(new Callback<String>() {
             @Override
@@ -574,7 +538,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
                         String data = response.body();
 
                         if (!data.isEmpty()) {
-                            addBwdbProjLayerToMap(data);
+                            addLgedProjLayerToMap(data);
                         } else {
                             Toast.makeText(getContext(), "Sorry, no data found!", Toast.LENGTH_LONG).show();
                         }
@@ -637,7 +601,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
                 }
 
                 MapLegendItem mapLegendItem = new MapLegendItem();
-                mapLegendItem.setTitle("BWDB Project");
+                mapLegendItem.setTitle("LGED Project");
                 mapLegendItem.setSubTitle(EMPTY_STRING);
                 mapLegendItem.setSourceLayerName(PROJECT_LAYER);
                 mapLegendItem.setFillLayerName(PROJECT_FILL_LAYER);
@@ -647,7 +611,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
                 mapLegendItem.setLineLayerColor("#3B7699");
                 lstMapLegendItem.add(mapLegendItem);
             } catch (Throwable throwable) {
-                Snackbar.make(this.getView(), "Couldn't add BWDB source to map", Snackbar.LENGTH_LONG)
+                Snackbar.make(this.getView(), "Couldn't add LGED source to map", Snackbar.LENGTH_LONG)
                         .setAction("Action", null)
                         .show();
             }
@@ -662,7 +626,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
             //URI uri = new URI(API.MAP_BASE_URL + "water_resources_wgs84/gwzone.json");
             //GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, uri);
 
-            GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI("asset://water_resources_wgs84/lgedprj.json"));
+            GeoJsonSource source = new GeoJsonSource(PROJECT_LAYER, new URI("asset://water_resources_wgs84/gwzone.json"));
             style.addSource(source);
 
             FillLayer fillLayer = new FillLayer(PROJECT_FILL_LAYER, PROJECT_LAYER);
@@ -918,9 +882,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
                 mapLegendItem.setLineLayerColor("#2A5F78");
                 lstMapLegendItem.add(mapLegendItem);
             } catch (Throwable throwable) {
-                Snackbar.make(this.getView(), "Couldn't add this investment project layer to map. " + throwable.getMessage(), Snackbar.LENGTH_LONG)
-                        .setAction("Action", null)
-                        .show();
+//                Snackbar.make(this.getView(), "Couldn't add this investment project layer to map. " + throwable.getMessage(), Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null)
+//                        .show();
             }
         });
     }
@@ -1192,6 +1156,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, MapboxM
 
     private void fabDetailsClick() {
         getMapLegendInfo();
+    }
+
+    public void ShowPopup(View v) {
+        TextView txtclose;
+        myDialog.setContentView(R.layout.legend_popup);
+        txtclose = (TextView) myDialog.findViewById(R.id.txtclose);
+        txtclose.setText("X");
+        txtclose.setOnClickListener(v1 -> myDialog.dismiss());
+        myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        myDialog.show();
     }
 
     private void getMapLegendInfo() {

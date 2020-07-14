@@ -144,9 +144,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|left"
         android:layout_margin="16dp"
-        android:backgroundTint="@color/OrangeYellow"
+        android:backgroundTint="@color/Orange"
         android:scaleType="fitXY"
-        android:src="@drawable/ic_map_legend"
+        android:src="@drawable/ic_layer"
         android:tint="@color/White"
         android:visibility="invisible" />
 

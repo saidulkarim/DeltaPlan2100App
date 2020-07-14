@@ -7,8 +7,8 @@ android {
         applicationId "com.cegis.deltaplan2100"
         minSdkVersion 15
         targetSdkVersion 29
-        versionCode 2
-        versionName '2.0.1'
+        versionCode 3
+        versionName '3.0.1'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

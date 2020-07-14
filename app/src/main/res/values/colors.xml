@@ -182,6 +182,7 @@
     <color name="colorAquaDark">#3BAFDA</color>
     <color name="colorPinkRose">#EC87C0</color>
     <color name="colorPinkRoseDark">#D770AD</color>
+    <color name="legendPopupDark">#2F333F</color>
 
     <array name="chart_color">
         <item>#31CCC9</item>
